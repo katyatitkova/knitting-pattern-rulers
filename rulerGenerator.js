@@ -8,20 +8,20 @@ const dpi = 96
 const cmPerInch = 2.54
 const pixelsPerCm = dpi / cmPerInch
 const markingHeightMultiplier = 0.75
+const markingHeightCm = 1
+const markingHeightPixels = markingHeightCm * pixelsPerCm
 
-const rulerLengthElementId = "rulerLength"
-const rulerHeightElementId = "rulerHeight"
 const canvasElementId = "rulerCanvas"
 
 const updateVariables = function () {
-    ruler.widthCm = document.getElementById(rulerLengthElementId).value
-    ruler.widthPixels = pixelsPerCm * ruler.widthCm
-    ruler.height = document.getElementById(rulerHeightElementId).value
-    ruler.heightPixels = pixelsPerCm * ruler.height
+    ruler.widthCm = document.getElementById("rulerLength").value
+    ruler.heightCm = document.getElementById("rulerHeight").value
     ruler.fontSize = document.getElementById("fontSize").value
     ruler.scale = document.getElementById("scale14").checked ?
         document.getElementById("scale14").value :
         document.getElementById("scale12").value
+    ruler.widthPixels = pixelsPerCm * ruler.widthCm / ruler.scale
+    ruler.heightPixels = pixelsPerCm * ruler.heightCm
     ruler.gauge = document.getElementById("gauge").value
     ruler.widthStitches = ruler.widthCm * ruler.gauge
     ruler.pixelsPerStitch = pixelsPerCm / ruler.gauge
@@ -29,8 +29,7 @@ const updateVariables = function () {
 
 const resizeCanvas = function () {
     document.getElementById(canvasElementId).width = ruler.widthPixels + rightMarginExtension
-    let heightAdded = 50
-    document.getElementById(canvasElementId).height = heightAdded + ruler.heightPixels
+    document.getElementById(canvasElementId).height = ruler.heightPixels
 }
 
 const addMarkingLabel = function (x1, y2, isFinal, label) {
@@ -78,12 +77,28 @@ const draw = function (index, height, spacing, assignNumber, isFinal) {
     }
 }
 
+const drawBorder = function (name, x1, y1, x2, y2) {
+    let topLine = new paper.Path.Line([x1, y1], [x2, y2])
+    topLine.name = name + " border line"
+    topLine.strokeColor = "black"
+    topLine.strokeColor = "1"
+}
+
+const drawBorders = function () {
+    let width = ruler.widthPixels + rightMarginExtension
+    let height = ruler.heightPixels
+    drawBorder("top", 0, 0, width, 0)
+    drawBorder("bottom", 0, height, width, height)
+    drawBorder("left", 0, 0, 0, height)
+    drawBorder("right", width, 0, width, height)
+}
+
 const constructRuler = function () {
     let isFinal = false
     let distance = 2
     for (let i = 0; i <= ruler.widthStitches; i += distance) {
-        let height = ruler.heightPixels * markingHeightMultiplier
-        let spacing = distance * ruler.pixelsPerStitch / ruler.scale
+        let height = markingHeightPixels * markingHeightMultiplier
+        let spacing =  ruler.pixelsPerStitch / ruler.scale
         let assignNumber = (i % 10 === 0)
         if (!assignNumber) {
             height = height * markingHeightMultiplier
@@ -93,6 +108,7 @@ const constructRuler = function () {
         }
         draw(i, height, spacing, assignNumber, isFinal)
     }
+    drawBorders()
 }
 
 const build = function () {
@@ -117,10 +133,10 @@ const exportSvg = function () {
         paper.view.viewSize = new paper.Size(exportWidth, exportHeight)
         const svgString = paper.project.exportSVG({
             asString: true,
-            size: { widthCm: exportWidth, height: exportHeight }
+            size: {width: exportWidth, height: exportHeight}
         })
 
-        const blob = new Blob([svgString], { type: "image/svg+xml" })
+        const blob = new Blob([svgString], {type: "image/svg+xml"})
         const url = URL.createObjectURL(blob)
 
         const downloadLink = document.createElement("a")
