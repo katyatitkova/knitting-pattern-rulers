@@ -11,16 +11,11 @@ const markingHeightMultiplier = 0.75
 
 const rulerLengthElementId = "rulerLength"
 const rulerHeightElementId = "rulerHeight"
-const fontSizeElementId = "fontSize"
-const scale14ElementId = "scale14"
-const scale12ElementId = "scale12"
-const filenameElementId = "filename"
-const exportButtonElementId = "exportButton"
 const canvasElementId = "rulerCanvas"
 
-// Don't divide intervals
+// Don't divide intervals (or divide them only to 1 part)
 const parts = 1
-// Divide each interval only once
+// But, if dividing, it becomes relevant: divide each interval only once
 const times = 1
 
 const updateVariables = function () {
@@ -28,11 +23,12 @@ const updateVariables = function () {
     ruler.widthPixels = pixelsPerCm * ruler.width
     ruler.height = document.getElementById(rulerHeightElementId).value
     ruler.heightPixels = pixelsPerCm * ruler.height
-    ruler.fontSize = document.getElementById(fontSizeElementId).value
+    ruler.fontSize = document.getElementById("fontSize").value
+    ruler.scale = document.getElementById("scale14").checked ?
+        document.getElementById("scale14").value :
+        document.getElementById("scale12").value;
+    ruler.gauge = document.getElementById("gauge").value
     ruler.markingsPerCm = Math.pow(parts, times)
-    ruler.scale = document.getElementById(scale14ElementId).checked ?
-        document.getElementById(scale14ElementId).value :
-        document.getElementById(scale12ElementId).value;
 }
 
 const checkLimits = function () {
@@ -153,8 +149,8 @@ const build = function () {
 }
 
 const exportSvg = function () {
-    document.getElementById(exportButtonElementId).addEventListener("click", function () {
-        const filename = document.getElementById(filenameElementId).value
+    document.getElementById("exportButton").addEventListener("click", function () {
+        const filename = document.getElementById("filename").value
 
         let exportWidth = document.getElementById(canvasElementId).width
         let exportHeight = document.getElementById(canvasElementId).height
