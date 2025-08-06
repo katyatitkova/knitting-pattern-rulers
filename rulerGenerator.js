@@ -1,8 +1,8 @@
 /* jshint asi: true*/
 const ruler = {};
-//Left and right canva added margings (px) to show all the vector rule
-const leftMargingDisplacement = 10;
-const rightMargingExtension = 20;
+//Left and right canva added margins (px) to show all the vector rule
+const leftMarginDisplacement = 10;
+const rightMarginExtension = 20;
 const dpi = 96;
 const unitsAbbr = "cm";
 const subUnitBase = 10;
@@ -38,19 +38,17 @@ const limitTickQty = function () {
     if (ruler.ticksPerUnit > 100) {
         console.info("Unreasonable exponent: " + ruler.ticksPerUnit + " resetting to reasonable")
         ruler.subUnitExponent = 1
-        document.getElementById("subUnitExponent")[ruler.subUnitExponent].selected = true;//selects resonable
+        document.getElementById("subUnitExponent")[ruler.subUnitExponent].selected = true;//selects reasonable
     }
 };
 
 const checkSubUnitBase = function () {
     let suffix = " " + unitsAbbr
 
-    let subLabelsDec = [
+    ruler.subLabels = [
         "1" + suffix,
         "1/10th" + suffix,
     ]
-
-    ruler.subLabels = subLabelsDec
 
     for (let i = ruler.subLabels.length - 1; i >= 0; i--) {
         document.getElementById("subUnitExponent")[i].text = ruler.subLabels[i]
@@ -58,7 +56,7 @@ const checkSubUnitBase = function () {
 };
 
 const resizeCanvas = function () {
-    document.getElementById("paintCanvas").width = ruler.width * dpi + rightMargingExtension;
+    document.getElementById("paintCanvas").width = ruler.width * dpi + rightMarginExtension;
     let heightAdded = 50
     document.getElementById("paintCanvas").height = heightAdded + ruler.heightPixels;
 };
@@ -94,7 +92,7 @@ const tickLabel = function(x1, y2, finalTick, tickIndex, exponentIndex){
 const tick = function(tickHeight, horizPosition, tickIndex, offsetTickIndex, exponentIndex, tickSpacing, finalTick){
 
     //exponentIndex is 0-6, how small it is, 6 being smallest
-    let x1 = leftMargingDisplacement + horizPosition + (tickSpacing * tickIndex)
+    let x1 = leftMarginDisplacement + horizPosition + (tickSpacing * tickIndex)
     let x2 = x1 //x === x because lines are vertical
     let y1 = 0//all lines start at top of screen
     let y2 = tickHeight//downward
@@ -138,7 +136,7 @@ const constructRuler = function () {
             tickHeight = ruler.heightPixels * Math.pow(ruler.levelToLevelMultiplier, exponentIndex)
 
             let tickSpacing = pixelsPerCm / (Math.pow(subUnitBase, exponentIndex))
-            //spacing between ticks, the fundemental datum on a ruler :-)
+            //spacing between ticks, the fundamental datum on a ruler :-)
             let offsetTickIndex = parseInt(tickIndex)
             tick(tickHeight, 0, tickIndex, offsetTickIndex, exponentIndex, tickSpacing, finalTick);
             //draws the ticks
@@ -183,17 +181,16 @@ const exportSvg = function () {
     //* I referenced the excellent SVG export example here: http://paperjs.org/features/#svg-import-and-export
     document.getElementById("svgexpbutton").onclick =
         function () {
-            exportWidth = document.getElementById("paintCanvas").width
-            exportHeight = document.getElementById("paintCanvas").height
+            let exportWidth = document.getElementById("paintCanvas").width
+            let exportHeight = document.getElementById("paintCanvas").height
 
             let downloadLink = document.getElementById('downloadSVG')
             // let svgString = paper.project.exportSVG({asString:true})
             let svgString = paper.project.exportSVG({asString: true, size: {width: exportWidth, height: exportHeight}});
 
-            let url = URL.createObjectURL(new Blob([svgString], {
+            downloadLink.href = URL.createObjectURL(new Blob([svgString], {
                 type: 'image/svg+xml'
-            }));
-            downloadLink.href = url
+            }))
             downloadLink.download = 'myRuler.svg';
 
 
