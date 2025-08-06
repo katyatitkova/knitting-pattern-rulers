@@ -81,13 +81,7 @@ const tickLabel = function(x1, y2, finalTick, tickIndex, exponentIndex){
     }//last label is right justified
     
     text.fillColor = 'black';
-    
-    if(document.getElementById('absoluteValues').checked) 
-    {
-        text.content = Math.abs(tickIndex);
-    } else {
-        text.content = tickIndex;
-    }
+    text.content = tickIndex;
     
     text.style = {
     // fontFamily: 'Helvetica',
@@ -165,7 +159,6 @@ const updateVariables = function () {
     ruler.heightPixels = pixelsPerCm * ruler.height
     ruler.subUnitExponent = document.getElementById('subUnitExponent').value;
     ruler.levelToLevelMultiplier = document.getElementById('levelToLevelMultiplier').value;
-    ruler.absoluteValues = document.getElementById('absoluteValues').checked;
     ruler.fontSize = document.getElementById('fontSize').value;
 };
 
