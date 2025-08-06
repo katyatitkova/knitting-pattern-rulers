@@ -98,8 +98,8 @@ const tick = function(tickHeight, horizPosition, tickIndex, offsetTickIndex, exp
         line.strokeColor = "black" // color of ruler line
         line.strokeWidth = "1" // width of ruler line in pixels
 
-        ruler.tickArray[ruler.masterTickIndex]=true // register the tick so it is not duplicated
-        if ((exponentIndex === 0) && (tickIndex % 5 === 0)) { // if is a primary tick, it needs a label
+        ruler.tickArray[ruler.masterTickIndex] = true // register the tick so it is not duplicated
+        if (((exponentIndex === 0) && (tickIndex % 5 === 0)) || finalTick) { // if is a primary tick, it needs a label
             tickLabel(x1, y2, finalTick, offsetTickIndex, exponentIndex)
         }
     }
