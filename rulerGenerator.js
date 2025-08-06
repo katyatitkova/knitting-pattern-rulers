@@ -1,8 +1,10 @@
 /* jshint asi: true*/
 const ruler = {};
-//Left and right canva added margins (px) to show all the vector rule
+
+// Left and right canva added margins (px) to show all the vector rule
 const leftMarginDisplacement = 10;
 const rightMarginExtension = 20;
+
 const dpi = 96;
 const unitsAbbr = "cm";
 const subUnitBase = 10;
@@ -10,7 +12,7 @@ const cmPerInch = 2.54;
 const pixelsPerCm =  dpi / cmPerInch;
 
 const limitTickQty = function () {
-    //Prevent it from crashing if it tries to render too many linest
+    // Prevent it from crashing if it tries to render too many lines
     ruler.ticksPerUnit = Math.pow(subUnitBase, ruler.subUnitExponent)
     ruler.masterTickQty = ruler.ticksPerUnit * ruler.width
     if (ruler.height > 100) {
@@ -62,7 +64,7 @@ const resizeCanvas = function () {
 };
 
 const tickLabel = function(x1, y2, finalTick, tickIndex, exponentIndex){
-    //label the tick
+    // label the tick
     let labelTextSize = ruler.fontSize;
     console.log('font size:' + labelTextSize)
 
@@ -76,55 +78,54 @@ const tickLabel = function(x1, y2, finalTick, tickIndex, exponentIndex){
     text.justification = 'left';
     if (finalTick) {
         text.justification = 'right'; //TODO: Future functionality: Make this optional.
-    }//last label is right justified
+    } // last label is right justified
     
     text.fillColor = 'black';
     text.content = tickIndex;
     
     text.style = {
-    // fontFamily: 'Helvetica',
-    fontFamily: 'monospace',
-    fontWeight: 'bold',
-    fontSize: labelTextSize}
+        fontFamily: 'monospace',
+        fontWeight: 'bold',
+        fontSize: labelTextSize
+    }
     text.name = ruler.subLabels[exponentIndex] + " label no. " +tickIndex //label for SVG editor
 };
 
 const tick = function(tickHeight, horizPosition, tickIndex, offsetTickIndex, exponentIndex, tickSpacing, finalTick){
-
-    //exponentIndex is 0-6, how small it is, 6 being smallest
+    // exponentIndex is 0-6, how small it is, 6 being smallest
     let x1 = leftMarginDisplacement + horizPosition + (tickSpacing * tickIndex)
-    let x2 = x1 //x === x because lines are vertical
-    let y1 = 0//all lines start at top of screen
-    let y2 = tickHeight//downward
+    let x2 = x1 // x === x because lines are vertical
+    let y1 = 0 // all lines start at top of screen
+    let y2 = tickHeight // downward
 
     if (ruler.tickArray[ruler.masterTickIndex]===undefined || ruler.redundant) {
         // if no tick exists already, or if we want redundant lines, draw the tick.
-        let line = new paper.Path.Line([x1, y1], [x2, y2]);//actual line instance
-        line.name = ruler.subLabels[exponentIndex]+ " Tick no. " + tickIndex //label for SVG editor
-        line.strokeColor = "black";//color of ruler line
-        line.strokeWidth = "1";//width of ruler line in pixels
+        let line = new paper.Path.Line([x1, y1], [x2, y2]); // actual line instance
+        line.name = ruler.subLabels[exponentIndex]+ " Tick no. " + tickIndex // label for SVG editor
+        line.strokeColor = "black"; // color of ruler line
+        line.strokeWidth = "1"; // width of ruler line in pixels
 
-        ruler.tickArray[ruler.masterTickIndex]=true //register the tick so it is not duplicated
-        if (exponentIndex === 0) {//if is a primary tick, it needs a label
+        ruler.tickArray[ruler.masterTickIndex]=true // register the tick so it is not duplicated
+        if (exponentIndex === 0) { // if is a primary tick, it needs a label
             tickLabel(x1,y2,finalTick,offsetTickIndex,exponentIndex)
         }
     }
 };
 
 const constructRuler = function () {
-    ruler.tickArray = [];//for prevention of redundancy, a member for each tick
-    const layerArray = new Array(ruler.subUnitExponent);//Layers in the SVG file.
+    ruler.tickArray = []; // for prevention of redundancy, a member for each tick
+    const layerArray = new Array(ruler.subUnitExponent); // Layers in the SVG file.
 
     let highestTickDenominatorMultiplier;
     for (let exponentIndex = 0; exponentIndex <= ruler.subUnitExponent; exponentIndex++) {
-        //loop through each desired level of ticks, inches, halves, quarters, etc....
+        // loop through each desired level of ticks, inches, halves, quarters, etc....
         let tickQty = ruler.width * Math.pow(subUnitBase, exponentIndex)
         layerArray[exponentIndex] = new paper.Layer();
         layerArray[exponentIndex].name = ruler.subLabels[exponentIndex] + " Tick Group";
 
         highestTickDenominatorMultiplier = ruler.ticksPerUnit / Math.pow(subUnitBase, exponentIndex)
 
-        //to prevent redundant ticks, this multiplier is applied to current units to ensure consistent indexing of ticks.
+        // to prevent redundant ticks, this multiplier is applied to current units to ensure consistent indexing of ticks.
         let finalTick = false
         for (let tickIndex = 0; tickIndex <= tickQty; tickIndex++) {
             ruler.masterTickIndex = highestTickDenominatorMultiplier * tickIndex
@@ -136,18 +137,17 @@ const constructRuler = function () {
             tickHeight = ruler.heightPixels * Math.pow(ruler.levelToLevelMultiplier, exponentIndex)
 
             let tickSpacing = pixelsPerCm / (Math.pow(subUnitBase, exponentIndex))
-            //spacing between ticks, the fundamental datum on a ruler :-)
+            // spacing between ticks, the fundamental datum on a ruler :-)
             let offsetTickIndex = parseInt(tickIndex)
             tick(tickHeight, 0, tickIndex, offsetTickIndex, exponentIndex, tickSpacing, finalTick);
-            //draws the ticks
+            // draws the ticks
         }
     }
 };
 
-
 const debug = function () {
     console.info("--All the variables---")
-    console.info(ruler)//prints all attributes of ruler object
+    console.info(ruler) // prints all attributes of ruler object
 };
 
 const updateVariables = function () {
@@ -167,7 +167,6 @@ const build = function () {
     // Create an empty project and a view for the canvas:
     paper.setup(canvas);
 
-
     updateVariables()
     checkSubUnitBase()
     limitTickQty()
@@ -178,47 +177,32 @@ const build = function () {
 };
 
 const exportSvg = function () {
-    //* I referenced the excellent SVG export example here: http://paperjs.org/features/#svg-import-and-export
+    // I referenced the excellent SVG export example here: http://paperjs.org/features/#svg-import-and-export
     document.getElementById("svgexpbutton").onclick =
         function () {
             let exportWidth = document.getElementById("paintCanvas").width
             let exportHeight = document.getElementById("paintCanvas").height
 
             let downloadLink = document.getElementById('downloadSVG')
-            // let svgString = paper.project.exportSVG({asString:true})
             let svgString = paper.project.exportSVG({asString: true, size: {width: exportWidth, height: exportHeight}});
 
             downloadLink.href = URL.createObjectURL(new Blob([svgString], {
                 type: 'image/svg+xml'
             }))
             downloadLink.download = 'myRuler.svg';
-
-
-            // viewBox ='viewBox="0 0 '+exportWidth+' '+exportHeight+'"'
-            // dims = ' width= "'+exportWidth+'" height="'+exportHeight+' " '
-            // let svgPrefix = '<svg x="0" y="0"'+dims+viewBox+' version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">';
-            // let svgPostfix = '</svg>';
-
-            // let elem = document.getElementById("svgexpdata");
-            // elem.value = 'data:image/svg+xml;base64,' + btoa(svg);
-            // //btoa Creates a base-64 encoded ASCII string from a "string" of binary data
-            // document.getElementById("svgexpform").submit();
         };
 
 };
 
 $(document).ready(function(){ 
     console.log("\t Welcome to the Ruler Generator │╵│╵│╵│╵│╵│╵│")
-    //When document is loaded, call build once
     build()
-    debug()//prints all values to browser console
+    debug()
 
     $( "#rulerParameters" ).change(function(  ) {
-        //anytime anything within the form is altered, call build again
         build()
-        debug()//prints all values to browser console
+        debug()
     });
 
     exportSvg()
-
 });
