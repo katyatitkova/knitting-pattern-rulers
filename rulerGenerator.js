@@ -4,7 +4,7 @@ const ruler = {};
 const leftMargingDisplacement = 10;
 const rightMargingExtension = 20;
 const dpi = 96;
-const unitsAbbr = "cm.";
+const unitsAbbr = "cm";
 const subUnitBase = 10;
 const cmPerInch = 2.54;
 const pixelsPerCm =  dpi / cmPerInch;
@@ -17,6 +17,11 @@ const limitTickQty = function () {
         console.info("Unreasonable ruler height: " + ruler.height + " reducing height")
         ruler.height = 15
         document.getElementById("rulerHeight").value = ruler.height;
+    }
+    if (ruler.width < 0) {
+        console.info("Negative widths are not supported")
+        ruler.width = -ruler.width
+        document.getElementById("rulerLength").value = ruler.width;
     }
     if (ruler.width > 1000) {
         console.info("Unreasonable tick quantity: " + ruler.masterTickQty + " reducing width")
@@ -125,8 +130,6 @@ const constructRuler = function () {
         layerArray[exponentIndex] = new paper.Layer();
         layerArray[exponentIndex].name = ruler.subLabels[exponentIndex] + " Tick Group";
 
-        let rulerLength = document.getElementById('rulerLength').value;
-
         highestTickDenominatorMultiplier = ruler.ticksPerUnit / Math.pow(subUnitBase, exponentIndex)
 
         //to prevent redundant ticks, this multiplier is applied to current units to ensure consistent indexing of ticks.
@@ -143,10 +146,6 @@ const constructRuler = function () {
             let tickSpacing = pixelsPerCm / (Math.pow(subUnitBase, exponentIndex))
             //spacing between ticks, the fundemental datum on a ruler :-)
             let offsetTickIndex = parseInt(tickIndex)
-            // Check if the ruler is inverted (from higher to lower values)
-            if (rulerLength < 0) {
-                offsetTickIndex = parseInt(tickIndex)
-            }
             tick(tickHeight, 0, tickIndex, offsetTickIndex, exponentIndex, tickSpacing, finalTick);
             //draws the ticks
         }
