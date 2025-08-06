@@ -7,17 +7,19 @@ const rightMarginExtension = 20
 const dpi = 96
 const cmPerInch = 2.54
 const pixelsPerCm = dpi / cmPerInch
-const markingHeightMultiplier = 0.5
+const markingHeightMultiplier = 0.75
 
 const rulerLengthElementId = "rulerLength"
 const rulerHeightElementId = "rulerHeight"
 const fontSizeElementId = "fontSize"
+const scale14ElementId = "scale14"
+const scale12ElementId = "scale12"
 const filenameElementId = "filename"
 const exportButtonElementId = "exportButton"
 const canvasElementId = "rulerCanvas"
 
-// Divide each interval in two parts
-const parts = 2
+// Don't divide intervals
+const parts = 1
 // Divide each interval only once
 const times = 1
 
@@ -28,6 +30,9 @@ const updateVariables = function () {
     ruler.heightPixels = pixelsPerCm * ruler.height
     ruler.fontSize = document.getElementById(fontSizeElementId).value
     ruler.markingsPerCm = Math.pow(parts, times)
+    ruler.scale = document.getElementById(scale14ElementId).checked ?
+        document.getElementById(scale14ElementId).value :
+        document.getElementById(scale12ElementId).value;
 }
 
 const checkLimits = function () {
@@ -94,7 +99,7 @@ const draw = function (index, arrayIndex, height, spacing, assignNumber, isFinal
         let line = new paper.Path.Line([x1, y1], [x2, y2])
         line.name = "Marking no. " + index
         line.strokeColor = "black"
-        line.strokeWidth = "1"
+        line.strokeWidth = assignNumber ? "2" : "1"
 
         ruler.markings[arrayIndex] = true
         if (assignNumber) {
@@ -120,8 +125,11 @@ const constructRuler = function () {
         for (let i = 0; i <= toDraw; i++) {
             let markingsIndex = markingsBetween * i
             let height = ruler.heightPixels * Math.pow(markingHeightMultiplier, level)
-            let spacing = pixelsPerCm / (Math.pow(parts, level))
+            let spacing = pixelsPerCm / (Math.pow(parts, level)) / ruler.scale
             let assignNumber = (((level === 0) && (i % 5 === 0)) || isFinal)
+            if (!assignNumber) {
+                height = height * markingHeightMultiplier
+            }
             if (i === toDraw) {
                 isFinal = true
             }
