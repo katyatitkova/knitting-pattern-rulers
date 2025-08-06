@@ -40,7 +40,7 @@ const limitTickQty = function () {
     if (ruler.ticksPerUnit > 100) {
         console.info("Unreasonable exponent: " + ruler.ticksPerUnit + " resetting to reasonable")
         ruler.subUnitExponent = 1
-        document.getElementById("subUnitExponent")[ruler.subUnitExponent].selected = true;//selects reasonable
+        document.getElementById("subUnitExponent")[ruler.subUnitExponent].selected = true; // selects reasonable
     }
 };
 
@@ -68,17 +68,16 @@ const tickLabel = function(x1, y2, finalTick, tickIndex, exponentIndex){
     let labelTextSize = ruler.fontSize;
     console.log('font size:' + labelTextSize)
 
-    //TODO: Improve this behaviour adding different offset options: bottom centered, right, left, etc...
     let xLabelOffset = -4    
     let yLabelOffset = 10
 
-    if (finalTick) {xLabelOffset = -1 * xLabelOffset}//last label is right justified
+    if (finalTick) {xLabelOffset = -1 * xLabelOffset} // last label is right justified
 
-    let text = new paper.PointText(new paper.Point(x1+ xLabelOffset, y2+yLabelOffset));
+    let text = new paper.PointText(new paper.Point(x1 + xLabelOffset, y2 + yLabelOffset));
     text.justification = 'left';
-    if (finalTick) {
-        text.justification = 'right'; //TODO: Future functionality: Make this optional.
-    } // last label is right justified
+    if (finalTick) { // last label is right justified
+        text.justification = 'right';
+    }
     
     text.fillColor = 'black';
     text.content = tickIndex;
@@ -88,7 +87,7 @@ const tickLabel = function(x1, y2, finalTick, tickIndex, exponentIndex){
         fontWeight: 'bold',
         fontSize: labelTextSize
     }
-    text.name = ruler.subLabels[exponentIndex] + " label no. " +tickIndex //label for SVG editor
+    text.name = ruler.subLabels[exponentIndex] + " label no. " + tickIndex // label for SVG editor
 };
 
 const tick = function(tickHeight, horizPosition, tickIndex, offsetTickIndex, exponentIndex, tickSpacing, finalTick){
@@ -101,13 +100,13 @@ const tick = function(tickHeight, horizPosition, tickIndex, offsetTickIndex, exp
     if (ruler.tickArray[ruler.masterTickIndex]===undefined || ruler.redundant) {
         // if no tick exists already, or if we want redundant lines, draw the tick.
         let line = new paper.Path.Line([x1, y1], [x2, y2]); // actual line instance
-        line.name = ruler.subLabels[exponentIndex]+ " Tick no. " + tickIndex // label for SVG editor
+        line.name = ruler.subLabels[exponentIndex] + " Tick no. " + tickIndex // label for SVG editor
         line.strokeColor = "black"; // color of ruler line
         line.strokeWidth = "1"; // width of ruler line in pixels
 
         ruler.tickArray[ruler.masterTickIndex]=true // register the tick so it is not duplicated
         if (exponentIndex === 0) { // if is a primary tick, it needs a label
-            tickLabel(x1,y2,finalTick,offsetTickIndex,exponentIndex)
+            tickLabel(x1, y2, finalTick, offsetTickIndex, exponentIndex)
         }
     }
 };
