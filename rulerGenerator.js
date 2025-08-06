@@ -1,8 +1,5 @@
 /* jshint asi: true*/
 const ruler = {};
-//dpi resolution control for different laser cut machines/applications
-const dpi72 = 72;
-const dpi96 = 96;
 //Left and right canva added margings (px) to show all the vector rule
 const leftMargingDisplacement = 10;
 const rightMargingExtension = 20;
@@ -175,7 +172,7 @@ const updateVariables = function () {
     ruler.subUnitExponent = document.getElementById('subUnitExponent').value;
     ruler.levelToLevelMultiplier = document.getElementById('levelToLevelMultiplier').value;
     ruler.absoluteValues = document.getElementById('absoluteValues').checked;
-    ruler.dpi = document.getElementById('dpi72').checked ? dpi72 : dpi96;
+    ruler.dpi = 96
     ruler.cmPerInch = 2.54;
     ruler.fontSize = document.getElementById('fontSize').value;
 };
