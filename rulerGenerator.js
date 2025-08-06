@@ -125,7 +125,6 @@ const constructRuler = function () {
         layerArray[exponentIndex] = new paper.Layer();
         layerArray[exponentIndex].name = ruler.subLabels[exponentIndex] + " Tick Group";
 
-        let startNo = document.getElementById('startNo').value;
         let endNo = document.getElementById('endNo').value;
 
         highestTickDenominatorMultiplier = ruler.ticksPerUnit / Math.pow(subUnitBase, exponentIndex)
@@ -143,10 +142,10 @@ const constructRuler = function () {
 
             let tickSpacing = pixelsPerCm / (Math.pow(subUnitBase, exponentIndex))
             //spacing between ticks, the fundemental datum on a ruler :-)
-            let offsetTickIndex = parseInt(tickIndex) + parseInt(startNo)
+            let offsetTickIndex = parseInt(tickIndex)
             // Check if the ruler is inverted (from higher to lower values)
-            if (startNo > endNo) {
-                offsetTickIndex = parseInt(tickIndex) - parseInt(startNo)
+            if (endNo < 0) {
+                offsetTickIndex = parseInt(tickIndex)
             }
             tick(tickHeight, 0, tickIndex, offsetTickIndex, exponentIndex, tickSpacing, finalTick);
             //draws the ticks
@@ -162,7 +161,7 @@ const debug = function () {
 
 const updateVariables = function () {
     ruler.redundant = document.getElementById('redundant').checked;
-    ruler.width = Math.abs(document.getElementById('startNo').value - document.getElementById('endNo').value); //Calculate the width based on the start and end numbers.
+    ruler.width = document.getElementById('endNo').value;
     ruler.height = document.getElementById('rulerHeight').value;
     ruler.heightPixels = pixelsPerCm * ruler.height
     ruler.subUnitExponent = document.getElementById('subUnitExponent').value;
