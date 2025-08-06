@@ -14,15 +14,17 @@ const rulerHeightElementId = "rulerHeight"
 const canvasElementId = "rulerCanvas"
 
 const updateVariables = function () {
-    ruler.width = document.getElementById(rulerLengthElementId).value
-    ruler.widthPixels = pixelsPerCm * ruler.width
+    ruler.widthCm = document.getElementById(rulerLengthElementId).value
+    ruler.widthPixels = pixelsPerCm * ruler.widthCm
     ruler.height = document.getElementById(rulerHeightElementId).value
     ruler.heightPixels = pixelsPerCm * ruler.height
     ruler.fontSize = document.getElementById("fontSize").value
     ruler.scale = document.getElementById("scale14").checked ?
         document.getElementById("scale14").value :
-        document.getElementById("scale12").value;
+        document.getElementById("scale12").value
     ruler.gauge = document.getElementById("gauge").value
+    ruler.widthStitches = ruler.widthCm * ruler.gauge
+    ruler.pixelsPerStitch = pixelsPerCm / ruler.gauge
 }
 
 const resizeCanvas = function () {
@@ -35,7 +37,7 @@ const addMarkingLabel = function (x1, y2, isFinal, label) {
     // label the marking
     let labelTextSize = ruler.fontSize
 
-    let xLabelOffset = -4
+    let xLabelOffset = -10
     let yLabelOffset = 15
 
     if (isFinal) { // last label is right justified
@@ -78,15 +80,16 @@ const draw = function (index, height, spacing, assignNumber, isFinal) {
 
 const constructRuler = function () {
     let isFinal = false
-    for (let i = 0; i <= ruler.width; i++) {
+    let distance = 2
+    for (let i = 0; i <= ruler.widthStitches; i += distance) {
         let height = ruler.heightPixels * markingHeightMultiplier
-        let spacing = pixelsPerCm / ruler.scale
-        if (i === ruler.width) {
-            isFinal = true
-        }
-        let assignNumber = ((i % 5 === 0) || isFinal)
+        let spacing = distance * ruler.pixelsPerStitch / ruler.scale
+        let assignNumber = (i % 10 === 0)
         if (!assignNumber) {
             height = height * markingHeightMultiplier
+        }
+        if (i === ruler.widthStitches) {
+            isFinal = true
         }
         draw(i, height, spacing, assignNumber, isFinal)
     }
@@ -114,7 +117,7 @@ const exportSvg = function () {
         paper.view.viewSize = new paper.Size(exportWidth, exportHeight)
         const svgString = paper.project.exportSVG({
             asString: true,
-            size: { width: exportWidth, height: exportHeight }
+            size: { widthCm: exportWidth, height: exportHeight }
         })
 
         const blob = new Blob([svgString], { type: "image/svg+xml" })
