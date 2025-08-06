@@ -91,8 +91,8 @@ const tick = function(tickHeight, horizPosition, tickIndex, offsetTickIndex, exp
     let y1 = 0 // all lines start at top of screen
     let y2 = tickHeight // downward
 
-    if (ruler.tickArray[ruler.masterTickIndex]===undefined || ruler.redundant) {
-        // if no tick exists already, or if we want redundant lines, draw the tick.
+    if (ruler.tickArray[ruler.masterTickIndex] === undefined) {
+        // if no tick exists already, draw the tick.
         let line = new paper.Path.Line([x1, y1], [x2, y2]) // actual line instance
         line.name = ruler.subLabels[exponentIndex] + " Tick no. " + tickIndex // label for SVG editor
         line.strokeColor = "black" // color of ruler line
@@ -143,7 +143,6 @@ const debug = function () {
 }
 
 const updateVariables = function () {
-    ruler.redundant = document.getElementById('redundant').checked
     ruler.width = document.getElementById('rulerLength').value
     ruler.height = document.getElementById('rulerHeight').value
     ruler.heightPixels = pixelsPerCm * ruler.height
