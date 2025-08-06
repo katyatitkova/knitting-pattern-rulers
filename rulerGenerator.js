@@ -3,10 +3,15 @@ const ruler = {};
 //Left and right canva added margings (px) to show all the vector rule
 const leftMargingDisplacement = 10;
 const rightMargingExtension = 20;
+const dpi = 96;
+const unitsAbbr = "cm.";
+const subUnitBase = 10;
+const cmPerInch = 2.54;
+const pixelsPerCm =  dpi / cmPerInch;
 
 const limitTickQty = function () {
     //Prevent it from crashing if it tries to render too many linest
-    ruler.ticksPerUnit = Math.pow(ruler.subUnitBase, ruler.subUnitExponent)
+    ruler.ticksPerUnit = Math.pow(subUnitBase, ruler.subUnitExponent)
     ruler.masterTickQty = ruler.ticksPerUnit * ruler.width
     if (ruler.height > 100) {
         console.info("Unreasonable ruler height: " + ruler.height + " reducing height")
@@ -32,17 +37,8 @@ const limitTickQty = function () {
     }
 };
 
-const checkUnit = function () {
-    let dpi = ruler.dpi //most used for laser cut programs
-    let pixelsPerCM =  dpi / 2.54
-    ruler.unitsAbbr = "cm."
-    ruler.pixelsPerUnit = pixelsPerCM
-    document.getElementById('heightTitle').textContent = 'Height (cm.):'
-    ruler.heightPixels = ruler.pixelsPerUnit * ruler.height
-};
-
 const checkSubUnitBase = function () {
-    let suffix = " " + ruler.unitsAbbr
+    let suffix = " " + unitsAbbr
 
     let subLabelsDec = [
         "1" + suffix,
@@ -57,7 +53,7 @@ const checkSubUnitBase = function () {
 };
 
 const resizeCanvas = function () {
-    document.getElementById("paintCanvas").width = ruler.width * ruler.dpi + rightMargingExtension;
+    document.getElementById("paintCanvas").width = ruler.width * dpi + rightMargingExtension;
     let heightAdded = 50
     document.getElementById("paintCanvas").height = heightAdded + ruler.heightPixels;
 };
@@ -125,14 +121,14 @@ const constructRuler = function () {
     let highestTickDenominatorMultiplier;
     for (let exponentIndex = 0; exponentIndex <= ruler.subUnitExponent; exponentIndex++) {
         //loop through each desired level of ticks, inches, halves, quarters, etc....
-        let tickQty = ruler.width * Math.pow(ruler.subUnitBase, exponentIndex)
+        let tickQty = ruler.width * Math.pow(subUnitBase, exponentIndex)
         layerArray[exponentIndex] = new paper.Layer();
         layerArray[exponentIndex].name = ruler.subLabels[exponentIndex] + " Tick Group";
 
         let startNo = document.getElementById('startNo').value;
         let endNo = document.getElementById('endNo').value;
 
-        highestTickDenominatorMultiplier = ruler.ticksPerUnit / Math.pow(ruler.subUnitBase, exponentIndex)
+        highestTickDenominatorMultiplier = ruler.ticksPerUnit / Math.pow(subUnitBase, exponentIndex)
 
         //to prevent redundant ticks, this multiplier is applied to current units to ensure consistent indexing of ticks.
         let finalTick = false
@@ -145,7 +141,7 @@ const constructRuler = function () {
             let tickHeight
             tickHeight = ruler.heightPixels * Math.pow(ruler.levelToLevelMultiplier, exponentIndex)
 
-            let tickSpacing = ruler.pixelsPerUnit / (Math.pow(ruler.subUnitBase, exponentIndex))
+            let tickSpacing = pixelsPerCm / (Math.pow(subUnitBase, exponentIndex))
             //spacing between ticks, the fundemental datum on a ruler :-)
             let offsetTickIndex = parseInt(tickIndex) + parseInt(startNo)
             // Check if the ruler is inverted (from higher to lower values)
@@ -165,15 +161,13 @@ const debug = function () {
 };
 
 const updateVariables = function () {
-    ruler.subUnitBase = 10;
     ruler.redundant = document.getElementById('redundant').checked;
     ruler.width = Math.abs(document.getElementById('startNo').value - document.getElementById('endNo').value); //Calculate the width based on the start and end numbers.
     ruler.height = document.getElementById('rulerHeight').value;
+    ruler.heightPixels = pixelsPerCm * ruler.height
     ruler.subUnitExponent = document.getElementById('subUnitExponent').value;
     ruler.levelToLevelMultiplier = document.getElementById('levelToLevelMultiplier').value;
     ruler.absoluteValues = document.getElementById('absoluteValues').checked;
-    ruler.dpi = 96
-    ruler.cmPerInch = 2.54;
     ruler.fontSize = document.getElementById('fontSize').value;
 };
 
@@ -186,7 +180,6 @@ const build = function () {
 
 
     updateVariables()
-    checkUnit()
     checkSubUnitBase()
     limitTickQty()
     resizeCanvas()
