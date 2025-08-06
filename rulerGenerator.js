@@ -174,6 +174,7 @@ const exportSvg = function () {
         function () {
             let exportWidth = document.getElementById("paintCanvas").width
             let exportHeight = document.getElementById("paintCanvas").height
+            paper.view.viewSize = new paper.Size(exportWidth, exportHeight);
 
             let downloadLink = document.getElementById('downloadSVG')
             let svgString = paper.project.exportSVG({asString: true, size: {width: exportWidth, height: exportHeight}});
