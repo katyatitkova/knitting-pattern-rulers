@@ -53,7 +53,7 @@ const checkSubUnitBase = function () {
 };
 
 const resizeCanvas = function () {
-    document.getElementById("paintCanvas").width = ruler.width * dpi + rightMarginExtension;
+    document.getElementById("paintCanvas").width = ruler.width * pixelsPerCm + rightMarginExtension;
     let heightAdded = 50
     document.getElementById("paintCanvas").height = heightAdded + ruler.heightPixels;
 };
