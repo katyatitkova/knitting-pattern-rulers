@@ -33,9 +33,6 @@ const resizeCanvas = function () {
 }
 
 const addMarkingLabel = function (x1, y2, isFinal, label) {
-    // label the marking
-    let labelTextSize = ruler.fontSize
-
     let xLabelOffset = -10
     let yLabelOffset = 15
 
@@ -55,7 +52,7 @@ const addMarkingLabel = function (x1, y2, isFinal, label) {
     text.style = {
         fontFamily: "monospace",
         fontWeight: "bold",
-        fontSize: labelTextSize
+        fontSize: ruler.fontSize
     }
     text.name = "Label no. " + label
 }
@@ -93,6 +90,21 @@ const drawBorders = function () {
     drawBorder("right", width, 0, width, height)
 }
 
+const addRulerInfo = function () {
+    let text = new paper.PointText(new paper.Point(50, ruler.heightPixels - 30))
+    text.justification = "left"
+
+    text.fillColor = "black"
+    text.content = "Scale 1/" + ruler.scale + "\nGauge " + ruler.gauge + " sts per 1 cm"
+
+    text.style = {
+        fontFamily: "monospace",
+        fontWeight: "bold",
+        fontSize: ruler.fontSize
+    }
+    text.name = "Ruler info"
+}
+
 const constructRuler = function () {
     let isFinal = false
     let distance = 2
@@ -109,6 +121,7 @@ const constructRuler = function () {
         draw(i, height, spacing, assignNumber, isFinal)
     }
     drawBorders()
+    addRulerInfo()
 }
 
 const build = function () {
