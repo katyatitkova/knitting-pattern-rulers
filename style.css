@@ -3,22 +3,26 @@
     flex-direction: column;
     gap: 10px;
 }
+
 .ribbon {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
 }
-.bootstrap-padded{
+
+.bootstrap-padded {
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
+
 .bootstrap-frm label {
     display: flex;
     flex-direction: row;
     gap: 10px;
     align-items: baseline;
 }
+
 .svg {
     display: flex;
     flex-direction: row;
