@@ -37,27 +37,27 @@
         <form id="rulerParameters" action="">
             <label>
                 <span>Length (cm):</span>
-                <input type="text" id="rulerLength" value="50">
+                <input id="rulerLength" type="number" value="50" min="1" max="100">
             </label>
             <label>
-                <span id="heightTitle">Height (cm):</span>
-                <input type="text" id="rulerHeight" value="1">
+                <span>Height (cm):</span>
+                <input id="rulerHeight" type="number" value="1" min="1" max="15">
             </label>
             <label>
                 <span>Scale:</span>
-                <Input type = "radio" id="scale14" value="4" checked>
+                <input type = "radio" id="scale14" value="4" checked>
                 1/4
 
-                <Input type = "radio" id="scale12" value="2" >
+                <input type = "radio" id="scale12" value="2" >
                 1/2
             </label>
             <label>
                 <span>Gauge (stitches/rows per 1 cm):</span>
-                <input id="gauge" type="text" value="3">
+                <input id="gauge" type="number" value="3" min="1" max="10">
             </label>
             <label>
                 <span>Font Size (px):</span>
-                <input id="fontSize" type="text" value="14">
+                <input id="fontSize" type="number" value="14" min="10" max="18">
             </label>
         </form>
         <form id="export" style="display:flex; gap:10px; align-items:baseline;">

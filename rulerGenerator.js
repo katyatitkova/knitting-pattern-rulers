@@ -25,25 +25,6 @@ const updateVariables = function () {
     ruler.gauge = document.getElementById("gauge").value
 }
 
-const checkLimits = function () {
-    //TODO modify checks
-    if (ruler.height > 100) {
-        console.info("Unreasonable ruler height")
-        ruler.height = 15
-        document.getElementById(rulerHeightElementId).value = ruler.height
-    }
-    if (ruler.width < 0) {
-        console.info("Negative widths are not supported")
-        ruler.width = -ruler.width
-        document.getElementById(rulerLengthElementId).value = ruler.width
-    }
-    if (ruler.width > 1000) {
-        console.info("Too long")
-        ruler.width = 500
-        document.getElementById(rulerLengthElementId).value = ruler.width
-    }
-}
-
 const resizeCanvas = function () {
     document.getElementById(canvasElementId).width = ruler.widthPixels + rightMarginExtension
     let heightAdded = 50
@@ -118,7 +99,6 @@ const build = function () {
     paper.setup(canvas)
 
     updateVariables()
-    checkLimits()
     resizeCanvas()
     constructRuler()
 
