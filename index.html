@@ -48,16 +48,14 @@
                 <input id="fontSize" type="text" name="fontSize" value="12">
             </label>
         </form>
-        <form id="svgexpform" style="display:flex; gap:10px; align-items:baseline;">
-            <b>Filename: </b>
-            <input type="text" name="filename" value="exportedRuler.svg">
-            <a href="#" id="downloadSVG">
-                <input type="button" class="button" value="Download ruler as .SVG" id="svgexpbutton">
-            </a>
+        <form id="export" style="display:flex; gap:10px; align-items:baseline;">
+            <label for="filename">Filename:</label>
+            <input type="text" id="filename" value="exportedRuler.svg">
+            <input type="button" class="button" value="Download ruler as .SVG" id="exportButton">
         </form>
     </div>
     <div style="overflow-x:scroll;">
-        <canvas id="paintCanvas" resize></canvas>
+        <canvas id="rulerCanvas" resize></canvas>
     </div>
 </div>
 </body>

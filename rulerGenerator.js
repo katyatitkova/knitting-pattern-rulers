@@ -1,168 +1,143 @@
-/* jshint asi: true*/
 const ruler = {}
 
-// Left and right canva added margins (px) to show all the vector rule
+// Left and right canva added margins (px)
 const leftMarginDisplacement = 10
 const rightMarginExtension = 20
 
 const dpi = 96
-const unitsAbbr = "cm"
-const subUnitBase = 2
 const cmPerInch = 2.54
 const pixelsPerCm = dpi / cmPerInch
+const markingHeightMultiplier = 0.5
 
-const limitTickQty = function () {
-    // Prevent it from crashing if it tries to render too many lines
-    ruler.ticksPerUnit = Math.pow(subUnitBase, ruler.subUnitExponent)
-    ruler.masterTickQty = ruler.ticksPerUnit * ruler.width
+const rulerLengthElementId = "rulerLength"
+const rulerHeightElementId = "rulerHeight"
+const fontSizeElementId = "fontSize"
+const filenameElementId = "filename"
+const exportButtonElementId = "exportButton"
+const canvasElementId = "rulerCanvas"
+
+// Divide each interval in two parts
+const parts = 2
+// Divide each interval only once
+const times = 1
+
+const updateVariables = function () {
+    ruler.width = document.getElementById(rulerLengthElementId).value
+    ruler.widthPixels = pixelsPerCm * ruler.width
+    ruler.height = document.getElementById(rulerHeightElementId).value
+    ruler.heightPixels = pixelsPerCm * ruler.height
+    ruler.fontSize = document.getElementById(fontSizeElementId).value
+    ruler.markingsPerCm = Math.pow(parts, times)
+}
+
+const checkLimits = function () {
+    //TODO modify checks
     if (ruler.height > 100) {
-        console.info("Unreasonable ruler height: " + ruler.height + " reducing height")
+        console.info("Unreasonable ruler height")
         ruler.height = 15
-        document.getElementById("rulerHeight").value = ruler.height
+        document.getElementById(rulerHeightElementId).value = ruler.height
     }
     if (ruler.width < 0) {
         console.info("Negative widths are not supported")
         ruler.width = -ruler.width
-        document.getElementById("rulerLength").value = ruler.width
+        document.getElementById(rulerLengthElementId).value = ruler.width
     }
     if (ruler.width > 1000) {
-        console.info("Unreasonable tick quantity: " + ruler.masterTickQty + " reducing width")
+        console.info("Too long")
         ruler.width = 500
-        document.getElementById("rulerWidth").value = ruler.width
+        document.getElementById(rulerLengthElementId).value = ruler.width
     }
-    if (ruler.masterTickQty > 10000) {
-        console.info("Unreasonable tick quantity: " + ruler.masterTickQty + " reducing exponent")
-        if (ruler.subUnitExponent > 1) {
-            ruler.subUnitExponent = ruler.subUnitExponent - 1
-            document.getElementById("subUnitExponent")[ruler.subUnitExponent].selected = true
-        }
-    }
-    if (ruler.ticksPerUnit > 100) {
-        console.info("Unreasonable exponent: " + ruler.ticksPerUnit + " resetting to reasonable")
-        ruler.subUnitExponent = 1
-        document.getElementById("subUnitExponent")[ruler.subUnitExponent].selected = true // selects reasonable
-    }
-}
-
-const checkSubUnitBase = function () {
-    let suffix = " " + unitsAbbr
-
-    ruler.subLabels = [
-        "1" + suffix,
-    ]
 }
 
 const resizeCanvas = function () {
-    document.getElementById("paintCanvas").width = ruler.width * pixelsPerCm + rightMarginExtension
+    document.getElementById(canvasElementId).width = ruler.widthPixels + rightMarginExtension
     let heightAdded = 50
-    document.getElementById("paintCanvas").height = heightAdded + ruler.heightPixels
+    document.getElementById(canvasElementId).height = heightAdded + ruler.heightPixels
 }
 
-const tickLabel = function (x1, y2, finalTick, tickIndex, exponentIndex) {
-    // label the tick
+const addMarkingLabel = function (x1, y2, isFinal, label) {
+    // label the marking
     let labelTextSize = ruler.fontSize
-    console.log('font size:' + labelTextSize)
 
     let xLabelOffset = -4
-    let yLabelOffset = 10
+    let yLabelOffset = 15
 
-    if (finalTick) { // last label is right justified
+    if (isFinal) { // last label is right justified
         xLabelOffset = -1 * xLabelOffset
     }
 
     let text = new paper.PointText(new paper.Point(x1 + xLabelOffset, y2 + yLabelOffset))
-    text.justification = 'left'
-    if (finalTick) { // last label is right justified
-        text.justification = 'right'
+    text.justification = "left"
+    if (isFinal) { // last label is right justified
+        text.justification = "right"
     }
 
-    text.fillColor = 'black'
-    text.content = tickIndex
+    text.fillColor = "black"
+    text.content = label
 
     text.style = {
-        fontFamily: 'monospace',
-        fontWeight: 'bold',
+        fontFamily: "monospace",
+        fontWeight: "bold",
         fontSize: labelTextSize
     }
-    text.name = ruler.subLabels[exponentIndex] + " label no. " + tickIndex // label for SVG editor
+    text.name = "Label no. " + label
 }
 
-const tick = function (tickHeight, horizPosition, tickIndex, offsetTickIndex, exponentIndex, tickSpacing, finalTick) {
-    let x1 = leftMarginDisplacement + horizPosition + (tickSpacing * tickIndex)
-    let x2 = x1 // x === x because lines are vertical
+const draw = function (index, arrayIndex, height, spacing, assignNumber, isFinal) {
+    let x1 = leftMarginDisplacement + (spacing * index)
+    let x2 = x1 // lines are vertical
     let y1 = 0 // all lines start at top of screen
-    let y2 = tickHeight // downward
+    let y2 = height // downward
 
-    if (ruler.tickArray[ruler.masterTickIndex] === undefined) {
-        // if no tick exists already, draw the tick.
-        let line = new paper.Path.Line([x1, y1], [x2, y2]) // actual line instance
-        line.name = ruler.subLabels[exponentIndex] + " Tick no. " + tickIndex // label for SVG editor
-        line.strokeColor = "black" // color of ruler line
-        line.strokeWidth = "1" // width of ruler line in pixels
+    if (ruler.markings[arrayIndex] === undefined) {
+        // Draw a marking if it doesn't exist already
+        let line = new paper.Path.Line([x1, y1], [x2, y2])
+        line.name = "Marking no. " + index
+        line.strokeColor = "black"
+        line.strokeWidth = "1"
 
-        ruler.tickArray[ruler.masterTickIndex] = true // register the tick so it is not duplicated
-        if (((exponentIndex === 0) && (tickIndex % 5 === 0)) || finalTick) { // if is a primary tick, it needs a label
-            tickLabel(x1, y2, finalTick, offsetTickIndex, exponentIndex)
+        ruler.markings[arrayIndex] = true
+        if (assignNumber) {
+            addMarkingLabel(x1, y2, isFinal, index)
         }
     }
 }
 
 const constructRuler = function () {
-    ruler.tickArray = [] // for prevention of redundancy, a member for each tick
-    const layerArray = new Array(ruler.subUnitExponent) // Layers in the SVG file.
+    ruler.markings = [] // store all added markings so they are not re-added
+    const layers = new Array(times) // layers in the SVG file
 
-    let highestTickDenominatorMultiplier
-    for (let exponentIndex = 0; exponentIndex <= ruler.subUnitExponent; exponentIndex++) {
-        // loop through each desired level of ticks, inches, halves, quarters, etc....
-        let tickQty = ruler.width * Math.pow(subUnitBase, exponentIndex)
-        layerArray[exponentIndex] = new paper.Layer()
-        layerArray[exponentIndex].name = ruler.subLabels[exponentIndex] + " Tick Group"
+    for (let level = 0; level <= times; level++) {
+        // The number of markings to draw on this level
+        let toDraw = ruler.width * Math.pow(parts, level)
+        layers[level] = new paper.Layer()
+        layers[level].name = "Marking Group"
 
-        highestTickDenominatorMultiplier = ruler.ticksPerUnit / Math.pow(subUnitBase, exponentIndex)
+        // How many markings of the smallest size are between this level's neighbouring markings
+        let markingsBetween = ruler.markingsPerCm / Math.pow(parts, level)
 
-        // to prevent redundant ticks, this multiplier is applied to current units to ensure consistent indexing of ticks.
-        let finalTick = false
-        for (let tickIndex = 0; tickIndex <= tickQty; tickIndex++) {
-            ruler.masterTickIndex = highestTickDenominatorMultiplier * tickIndex
-            if (tickIndex === tickQty) {
-                finalTick = true
+        let isFinal = false
+        for (let i = 0; i <= toDraw; i++) {
+            let markingsIndex = markingsBetween * i
+            let height = ruler.heightPixels * Math.pow(markingHeightMultiplier, level)
+            let spacing = pixelsPerCm / (Math.pow(parts, level))
+            let assignNumber = (((level === 0) && (i % 5 === 0)) || isFinal)
+            if (i === toDraw) {
+                isFinal = true
             }
-            let tickHeight
-            tickHeight = ruler.heightPixels * Math.pow(ruler.levelToLevelMultiplier, exponentIndex)
-
-            let tickSpacing = pixelsPerCm / (Math.pow(subUnitBase, exponentIndex))
-            // spacing between ticks, the fundamental datum on a ruler :-)
-            let offsetTickIndex = parseInt(tickIndex)
-            tick(tickHeight, 0, tickIndex, offsetTickIndex, exponentIndex, tickSpacing, finalTick)
-            // draws the ticks
+            draw(i, markingsIndex, height, spacing, assignNumber, isFinal)
         }
     }
 }
 
-const debug = function () {
-    console.info("--All the variables---")
-    console.info(ruler) // prints all attributes of ruler object
-}
-
-const updateVariables = function () {
-    ruler.width = document.getElementById('rulerLength').value
-    ruler.height = document.getElementById('rulerHeight').value
-    ruler.heightPixels = pixelsPerCm * ruler.height
-    ruler.subUnitExponent = 1
-    ruler.levelToLevelMultiplier = 0.5
-    ruler.fontSize = document.getElementById('fontSize').value
-}
-
 const build = function () {
-    // Get a reference to the canvas object
-    let canvas = document.getElementById('paintCanvas')
+    let canvas = document.getElementById(canvasElementId)
 
-    // Create an empty project and a view for the canvas:
+    // Create an empty project and a view for the canvas
     paper.setup(canvas)
 
     updateVariables()
-    checkSubUnitBase()
-    limitTickQty()
+    checkLimits()
     resizeCanvas()
     constructRuler()
 
@@ -170,32 +145,35 @@ const build = function () {
 }
 
 const exportSvg = function () {
-    // I referenced the excellent SVG export example here: http://paperjs.org/features/#svg-import-and-export
-    document.getElementById("svgexpbutton").onclick =
-        function () {
-            let exportWidth = document.getElementById("paintCanvas").width
-            let exportHeight = document.getElementById("paintCanvas").height
-            paper.view.viewSize = new paper.Size(exportWidth, exportHeight)
+    document.getElementById(exportButtonElementId).addEventListener("click", function () {
+        const filename = document.getElementById(filenameElementId).value
 
-            let downloadLink = document.getElementById('downloadSVG')
-            let svgString = paper.project.exportSVG({asString: true, size: {width: exportWidth, height: exportHeight}})
+        let exportWidth = document.getElementById(canvasElementId).width
+        let exportHeight = document.getElementById(canvasElementId).height
+        paper.view.viewSize = new paper.Size(exportWidth, exportHeight)
+        const svgString = paper.project.exportSVG({
+            asString: true,
+            size: { width: exportWidth, height: exportHeight }
+        })
 
-            downloadLink.href = URL.createObjectURL(new Blob([svgString], {
-                type: 'image/svg+xml'
-            }))
-            downloadLink.download = 'myRuler.svg'
-        }
+        const blob = new Blob([svgString], { type: "image/svg+xml" })
+        const url = URL.createObjectURL(blob)
 
+        const downloadLink = document.createElement("a")
+        downloadLink.href = url
+        downloadLink.download = filename
+        downloadLink.click()
+
+        setTimeout(() => URL.revokeObjectURL(url), 1000)
+    });
 }
 
 $(document).ready(function () {
     console.log("\t Welcome to the Ruler Generator │╵│╵│╵│╵│╵│╵│")
     build()
-    debug()
 
     $("#rulerParameters").change(function () {
         build()
-        debug()
     })
 
     exportSvg()
