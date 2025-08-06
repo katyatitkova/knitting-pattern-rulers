@@ -38,71 +38,24 @@ const limitTickQty = function () {
 const checkUnit = function () {
     let dpi = ruler.dpi //most used for laser cut programs
     let pixelsPerCM =  dpi / 2.54
-    let pixelsPerInch =  dpi
-
-    if (ruler.units === "inches") {
-        ruler.pixelsPerUnit = pixelsPerInch
-        ruler.unitsAbbr = "\"in."
-        document.getElementById('heightTitle').textContent = 'Height (in.):'
-    } else if (ruler.units === "centimeters") {
-        ruler.unitsAbbr = "cm."
-        ruler.pixelsPerUnit = pixelsPerCM
-        document.getElementById('heightTitle').textContent = 'Height (cm.):'
-    } else {
-        ruler.pixelsPerUnit = 0
-        console.error("Unexpected unit value. Unit value: " + rulerUnits)
-    }
+    ruler.unitsAbbr = "cm."
+    ruler.pixelsPerUnit = pixelsPerCM
+    document.getElementById('heightTitle').textContent = 'Height (cm.):'
     ruler.heightPixels = ruler.pixelsPerUnit * ruler.height
 };
 
 const checkSubUnitBase = function () {
-    // if it is fractional, make the fractional dropdown appear
-    // if it is decimal, likewise
     let suffix = " " + ruler.unitsAbbr
 
     let subLabelsDec = [
         "1" + suffix,
         "1/10th" + suffix,
-        "1/100th" + suffix,
-        "1/1000th" + suffix,
-        "1/10000th" + suffix,
-        "1/100000th" + suffix,
-        "1/1000000th" + suffix,
     ]
 
-    let subLabelsFrac = [
-        "1" + suffix,
-        "1/2" + suffix,
-        "1/4" + suffix,
-        "1/8" + suffix,
-        "1/16" + suffix,
-        "1/32" + suffix,
-        "1/64" + suffix,
-    ]
+    ruler.subLabels = subLabelsDec
 
-    if (ruler.subUnitBase === '10') {//Decimal!
-        ruler.subLabels = subLabelsDec
-        document.getElementById("subUnitExponent")[3].disabled = true;
-        document.getElementById("subUnitExponent")[4].disabled = true;//disable the ones that crash.
-        document.getElementById("subUnitExponent")[5].disabled = true;
-        document.getElementById("subUnitExponent")[6].disabled = true;
-
-        for (let i = ruler.subLabels.length - 1; i >= 0; i--) {
-            document.getElementById("subUnitExponent")[i].text = ruler.subLabels[i]
-        }
-    } else if (ruler.subUnitBase === '2') {//Fractional!
-        ruler.subLabels = subLabelsFrac
-
-        document.getElementById("subUnitExponent")[3].disabled = false;
-        document.getElementById("subUnitExponent")[4].disabled = false;
-        document.getElementById("subUnitExponent")[5].disabled = false;//re-enable the ones that dont crash
-        document.getElementById("subUnitExponent")[6].disabled = false;
-
-        for (let j = ruler.subLabels.length - 1; j >= 0; j--) {
-            document.getElementById("subUnitExponent")[j].text = ruler.subLabels[j]
-        }
-    } else {
-        console.error("Impossible subUnitBase. Must be 2 or 10. is:  " + ruler.subUnitBase)
+    for (let i = ruler.subLabels.length - 1; i >= 0; i--) {
+        document.getElementById("subUnitExponent")[i].text = ruler.subLabels[i]
     }
 };
 
@@ -215,12 +168,7 @@ const debug = function () {
 };
 
 const updateVariables = function () {
-    ruler.units = document.getElementById('rulerUnitsInches').checked ? 
-        document.getElementById('rulerUnitsInches').value : 
-        document.getElementById('rulerUnitsCentimeters').value;
-    ruler.subUnitBase = document.getElementById('subUnitsFractional').checked ? 
-        document.getElementById('subUnitsFractional').value :
-        document.getElementById('subUnitsDecimal').value;
+    ruler.subUnitBase = 10;
     ruler.redundant = document.getElementById('redundant').checked;
     ruler.width = Math.abs(document.getElementById('startNo').value - document.getElementById('endNo').value); //Calculate the width based on the start and end numbers.
     ruler.height = document.getElementById('rulerHeight').value;
