@@ -9,7 +9,7 @@ const dpi = 96
 const unitsAbbr = "cm"
 const subUnitBase = 2
 const cmPerInch = 2.54
-const pixelsPerCm =  dpi / cmPerInch
+const pixelsPerCm = dpi / cmPerInch
 
 const limitTickQty = function () {
     // Prevent it from crashing if it tries to render too many lines
@@ -58,25 +58,27 @@ const resizeCanvas = function () {
     document.getElementById("paintCanvas").height = heightAdded + ruler.heightPixels
 }
 
-const tickLabel = function(x1, y2, finalTick, tickIndex, exponentIndex){
+const tickLabel = function (x1, y2, finalTick, tickIndex, exponentIndex) {
     // label the tick
     let labelTextSize = ruler.fontSize
     console.log('font size:' + labelTextSize)
 
-    let xLabelOffset = -4    
+    let xLabelOffset = -4
     let yLabelOffset = 10
 
-    if (finalTick) {xLabelOffset = -1 * xLabelOffset} // last label is right justified
+    if (finalTick) { // last label is right justified
+        xLabelOffset = -1 * xLabelOffset
+    }
 
     let text = new paper.PointText(new paper.Point(x1 + xLabelOffset, y2 + yLabelOffset))
     text.justification = 'left'
     if (finalTick) { // last label is right justified
         text.justification = 'right'
     }
-    
+
     text.fillColor = 'black'
     text.content = tickIndex
-    
+
     text.style = {
         fontFamily: 'monospace',
         fontWeight: 'bold',
@@ -85,7 +87,7 @@ const tickLabel = function(x1, y2, finalTick, tickIndex, exponentIndex){
     text.name = ruler.subLabels[exponentIndex] + " label no. " + tickIndex // label for SVG editor
 }
 
-const tick = function(tickHeight, horizPosition, tickIndex, offsetTickIndex, exponentIndex, tickSpacing, finalTick){
+const tick = function (tickHeight, horizPosition, tickIndex, offsetTickIndex, exponentIndex, tickSpacing, finalTick) {
     let x1 = leftMarginDisplacement + horizPosition + (tickSpacing * tickIndex)
     let x2 = x1 // x === x because lines are vertical
     let y1 = 0 // all lines start at top of screen
@@ -186,12 +188,12 @@ const exportSvg = function () {
 
 }
 
-$(document).ready(function(){ 
+$(document).ready(function () {
     console.log("\t Welcome to the Ruler Generator │╵│╵│╵│╵│╵│╵│")
     build()
     debug()
 
-    $( "#rulerParameters" ).change(function(  ) {
+    $("#rulerParameters").change(function () {
         build()
         debug()
     })
