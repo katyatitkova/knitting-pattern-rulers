@@ -7,7 +7,7 @@ const rightMarginExtension = 20;
 
 const dpi = 96;
 const unitsAbbr = "cm";
-const subUnitBase = 10;
+const subUnitBase = 2;
 const cmPerInch = 2.54;
 const pixelsPerCm =  dpi / cmPerInch;
 
@@ -49,12 +49,7 @@ const checkSubUnitBase = function () {
 
     ruler.subLabels = [
         "1" + suffix,
-        "1/10th" + suffix,
     ]
-
-    for (let i = ruler.subLabels.length - 1; i >= 0; i--) {
-        document.getElementById("subUnitExponent")[i].text = ruler.subLabels[i]
-    }
 };
 
 const resizeCanvas = function () {
@@ -91,7 +86,6 @@ const tickLabel = function(x1, y2, finalTick, tickIndex, exponentIndex){
 };
 
 const tick = function(tickHeight, horizPosition, tickIndex, offsetTickIndex, exponentIndex, tickSpacing, finalTick){
-    // exponentIndex is 0-6, how small it is, 6 being smallest
     let x1 = leftMarginDisplacement + horizPosition + (tickSpacing * tickIndex)
     let x2 = x1 // x === x because lines are vertical
     let y1 = 0 // all lines start at top of screen
@@ -105,7 +99,7 @@ const tick = function(tickHeight, horizPosition, tickIndex, offsetTickIndex, exp
         line.strokeWidth = "1"; // width of ruler line in pixels
 
         ruler.tickArray[ruler.masterTickIndex]=true // register the tick so it is not duplicated
-        if (exponentIndex === 0) { // if is a primary tick, it needs a label
+        if ((exponentIndex === 0) && (tickIndex % 5 === 0)) { // if is a primary tick, it needs a label
             tickLabel(x1, y2, finalTick, offsetTickIndex, exponentIndex)
         }
     }
@@ -131,7 +125,6 @@ const constructRuler = function () {
             if (tickIndex === tickQty) {
                 finalTick = true
             }
-            // levelToLevelMultiplier =0.7
             let tickHeight
             tickHeight = ruler.heightPixels * Math.pow(ruler.levelToLevelMultiplier, exponentIndex)
 
@@ -154,8 +147,8 @@ const updateVariables = function () {
     ruler.width = document.getElementById('rulerLength').value;
     ruler.height = document.getElementById('rulerHeight').value;
     ruler.heightPixels = pixelsPerCm * ruler.height
-    ruler.subUnitExponent = document.getElementById('subUnitExponent').value;
-    ruler.levelToLevelMultiplier = document.getElementById('levelToLevelMultiplier').value;
+    ruler.subUnitExponent = 1;
+    ruler.levelToLevelMultiplier = 0.5;
     ruler.fontSize = document.getElementById('fontSize').value;
 };
 
