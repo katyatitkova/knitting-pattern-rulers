@@ -6,7 +6,13 @@
     <meta name="description" content="Generator of downloadable vector rulers for knitting pattern drafting">
     <meta name="keywords" content="SVG ruler, Patternmaking ruler, Knitting ruler">
     <meta name="author" content="Katya Titkova">
-    <link rel="stylesheet" type="text/css" href="style.css">
+    <style>
+        .selectors label {
+            display: flex;
+            gap: 10px;
+            align-items: baseline;
+        }
+    </style>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.min.css">
     <script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js'></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/paper.js/0.12.18/paper-full.min.js"
@@ -17,8 +23,8 @@
 </head>
 <body>
 
-<div class="bootstrap-frm">
-    <div class="ribbon">
+<div style="display:flex; flex-direction:column; gap:10px">
+    <div style="display:flex; justify-content:space-between;">
         <h1>Knitting Ruler Generator</h1>
         <a href="https://github.com/katyatitkova/knitting-pattern-rulers">
             <svg height="32" aria-hidden="true" viewBox="0 0 24 24" width="32" data-view-component="true"
@@ -27,7 +33,7 @@
             </svg>
             <br/><span>Fork me on GitHub</span></a>
     </div>
-    <div class="bootstrap-padded">
+    <div class="selectors" style="display:flex; flex-direction:column; gap:10px;">
         <form id="rulerParameters" action="">
             <label>
                 <span>Length (cm):</span>
@@ -42,7 +48,7 @@
                 <input id="fontSize" type="text" name="fontSize" value="12">
             </label>
         </form>
-        <form id="svgexpform" class="svg">
+        <form id="svgexpform" style="display:flex; gap:10px; align-items:baseline;">
             <b>Filename: </b>
             <input type="text" name="filename" value="exportedRuler.svg">
             <a href="#" id="downloadSVG">
