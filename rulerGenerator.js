@@ -4,9 +4,10 @@ const ruler = {}
 const leftMarginDisplacement = 10
 const rightMarginExtension = 20
 
-const dpi = 96
+const svgDpi = 96
+const pdfDpi = 72
 const cmPerInch = 2.54
-const pixelsPerCm = dpi / cmPerInch
+const pixelsPerCm = svgDpi / cmPerInch
 const markingHeightMultiplier = 0.25
 const markingHeightCm = 0.8
 const markingHeightPixels = markingHeightCm * pixelsPerCm
@@ -28,8 +29,14 @@ const updateVariables = function () {
 }
 
 const resizeCanvas = function () {
-    document.getElementById(canvasElementId).width = ruler.widthPixels + rightMarginExtension
-    document.getElementById(canvasElementId).height = ruler.heightPixels
+    let width = ruler.widthPixels + rightMarginExtension
+    let height = ruler.heightPixels
+
+    document.getElementById(canvasElementId).width = width
+    document.getElementById(canvasElementId).height = height
+
+    document.getElementById(canvasElementId).style.width = width + 'px'
+    document.getElementById(canvasElementId).style.height = height + 'px'
 }
 
 const addMarkingLabel = function (x1, y2, isFinal, label) {
@@ -126,7 +133,6 @@ const constructRuler = function () {
 const build = function () {
     let canvas = document.getElementById(canvasElementId)
 
-    // Create an empty project and a view for the canvas
     paper.setup(canvas)
 
     updateVariables()
@@ -136,37 +142,37 @@ const build = function () {
     paper.view.draw()
 }
 
-const exportSvg = function () {
+const exportPdf = function () {
     document.getElementById("exportButton").addEventListener("click", function () {
-        const filename = document.getElementById("filename").value
+        const filename = document.getElementById("filename").value || "ruler.pdf"
 
-        let exportWidth = document.getElementById(canvasElementId).width
-        let exportHeight = document.getElementById(canvasElementId).height
-        paper.view.viewSize = new paper.Size(exportWidth, exportHeight)
-        const svgString = paper.project.exportSVG({
-            asString: true,
-            size: {width: exportWidth, height: exportHeight}
+        const canvas = document.getElementById(canvasElementId)
+        const imgData = canvas.toDataURL("image/png")
+
+        const { jsPDF } = window.jspdf
+
+        const pdf = new jsPDF({
+            orientation: "landscape",
+            unit: "pt",
+            format: "a4"
         })
 
-        const blob = new Blob([svgString], {type: "image/svg+xml"})
-        const url = URL.createObjectURL(blob)
+        const ptPerPx = pdfDpi / svgDpi
+        const imgWidthPt = canvas.width * ptPerPx
+        const imgHeightPt = canvas.height * ptPerPx
 
-        const downloadLink = document.createElement("a")
-        downloadLink.href = url
-        downloadLink.download = filename
-        downloadLink.click()
 
-        setTimeout(() => URL.revokeObjectURL(url), 1000)
-    });
+        pdf.addImage(imgData, "PNG", 40, 40, imgWidthPt, imgHeightPt)
+        pdf.save(filename.endsWith(".pdf") ? filename : filename + ".pdf")
+    })
 }
 
 $(document).ready(function () {
-    console.log("\t Welcome to the Ruler Generator │╵│╵│╵│╵│╵│╵│")
     build()
 
     $("#rulerParameters").change(function () {
         build()
     })
 
-    exportSvg()
+    exportPdf()
 })

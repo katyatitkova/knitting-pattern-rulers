@@ -18,6 +18,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/paper.js/0.12.18/paper-full.min.js"
             integrity="sha512-qaPSGmKTwpu5ChwJ6AD3w7ecS3yM7pFC1cS3IfnjPM67dhXoymEomk1wqiZEHUFO4dQO1bhjo8LYImVDSDfR1g=="
             crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/3.0.1/jspdf.umd.min.js"></script>
     <script type="text/javascript" src="rulerGenerator.js"></script>
 
 </head>
@@ -47,7 +48,6 @@
                 <span>Scale:</span>
                 <input id="scale14" type = "radio" name="scale" value="4" checked>
                 1/4
-
                 <input id="scale12" type = "radio" name="scale" value="2" >
                 1/2
             </label>
@@ -62,13 +62,11 @@
         </form>
         <form id="export" style="display:flex; gap:10px; align-items:baseline;">
             <label for="filename">Filename:</label>
-            <input type="text" id="filename" value="exportedRuler.svg">
-            <input type="button" class="button" value="Download ruler as .SVG" id="exportButton">
+            <input type="text" id="filename" value="ruler.pdf">
+            <input type="button" class="button" value="Download ruler as .pdf" id="exportButton">
         </form>
     </div>
-    <div style="overflow-x:scroll;">
-        <canvas id="rulerCanvas" resize></canvas>
-    </div>
+    <canvas id="rulerCanvas" style="display:block;"></canvas>
 </div>
 </body>
 </html>
