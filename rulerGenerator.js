@@ -7,8 +7,8 @@ const rightMarginExtension = 20
 const dpi = 96
 const cmPerInch = 2.54
 const pixelsPerCm = dpi / cmPerInch
-const markingHeightMultiplier = 0.75
-const markingHeightCm = 1
+const markingHeightMultiplier = 0.25
+const markingHeightCm = 0.8
 const markingHeightPixels = markingHeightCm * pixelsPerCm
 
 const canvasElementId = "rulerCanvas"
@@ -59,15 +59,14 @@ const addMarkingLabel = function (x1, y2, isFinal, label) {
 
 const draw = function (index, height, spacing, assignNumber, isFinal) {
     let x1 = leftMarginDisplacement + (spacing * index)
-    let x2 = x1 // lines are vertical
-    let y1 = 0 // all lines start at top of screen
-    let y2 = height // downward
+    let x2 = x1
+    let y1 = 0
+    let y2 = height
 
-    // Draw a marking if it doesn't exist already
     let line = new paper.Path.Line([x1, y1], [x2, y2])
     line.name = "Marking no. " + index
     line.strokeColor = "black"
-    line.strokeWidth = assignNumber ? "2" : "1"
+    line.strokeWidth = "1"
 
     if (assignNumber) {
         addMarkingLabel(x1, y2, isFinal, index)
@@ -78,7 +77,7 @@ const drawBorder = function (name, x1, y1, x2, y2) {
     let topLine = new paper.Path.Line([x1, y1], [x2, y2])
     topLine.name = name + " border line"
     topLine.strokeColor = "black"
-    topLine.strokeColor = "1"
+    topLine.strokeWidth = "1"
 }
 
 const drawBorders = function () {
@@ -109,7 +108,7 @@ const constructRuler = function () {
     let isFinal = false
     let distance = 2
     for (let i = 0; i <= ruler.widthStitches; i += distance) {
-        let height = markingHeightPixels * markingHeightMultiplier
+        let height = markingHeightPixels
         let spacing =  ruler.pixelsPerStitch / ruler.scale
         let assignNumber = (i % 10 === 0)
         if (!assignNumber) {
