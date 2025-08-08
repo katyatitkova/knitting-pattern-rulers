@@ -1,13 +1,12 @@
 const ruler = {}
 
-// Left and right canva added margins (px)
-const leftMarginDisplacement = 10
-const rightMarginExtension = 20
+const leftMargin = 30
+const rightMargin = 60
 
-const svgDpi = 96
+const drawDpi = 300
 const pdfDpi = 72
 const cmPerInch = 2.54
-const pixelsPerCm = svgDpi / cmPerInch
+const pixelsPerCm = drawDpi / cmPerInch
 const markingHeightMultiplier = 0.25
 const markingHeightCm = 0.8
 const markingHeightPixels = markingHeightCm * pixelsPerCm
@@ -29,19 +28,19 @@ const updateVariables = function () {
 }
 
 const resizeCanvas = function () {
-    let width = ruler.widthPixels + rightMarginExtension
+    let width = ruler.widthPixels + rightMargin
     let height = ruler.heightPixels
 
     document.getElementById(canvasElementId).width = width
     document.getElementById(canvasElementId).height = height
 
-    document.getElementById(canvasElementId).style.width = width + 'px'
-    document.getElementById(canvasElementId).style.height = height + 'px'
+    document.getElementById(canvasElementId).style.width = (width / 3) + 'px'
+    document.getElementById(canvasElementId).style.height = (height / 3) + 'px'
 }
 
 const addMarkingLabel = function (x1, y2, isFinal, label) {
-    let xLabelOffset = -10
-    let yLabelOffset = 15
+    let xLabelOffset = -15
+    let yLabelOffset = 30
 
     if (isFinal) { // last label is right justified
         xLabelOffset = -1 * xLabelOffset
@@ -65,7 +64,7 @@ const addMarkingLabel = function (x1, y2, isFinal, label) {
 }
 
 const draw = function (index, height, spacing, assignNumber, isFinal) {
-    let x1 = leftMarginDisplacement + (spacing * index)
+    let x1 = leftMargin + (spacing * index)
     let x2 = x1
     let y1 = 0
     let y2 = height
@@ -88,7 +87,7 @@ const drawBorder = function (name, x1, y1, x2, y2) {
 }
 
 const drawBorders = function () {
-    let width = ruler.widthPixels + rightMarginExtension
+    let width = ruler.widthPixels + rightMargin
     let height = ruler.heightPixels
     drawBorder("top", 0, 0, width, 0)
     drawBorder("bottom", 0, height, width, height)
@@ -97,7 +96,7 @@ const drawBorders = function () {
 }
 
 const addRulerInfo = function () {
-    let text = new paper.PointText(new paper.Point(50, ruler.heightPixels - 30))
+    let text = new paper.PointText(new paper.Point(100, ruler.heightPixels - 100))
     text.justification = "left"
 
     text.fillColor = "black"
@@ -157,10 +156,9 @@ const exportPdf = function () {
             format: "a4"
         })
 
-        const ptPerPx = pdfDpi / svgDpi
+        const ptPerPx = pdfDpi / drawDpi
         const imgWidthPt = canvas.width * ptPerPx
         const imgHeightPt = canvas.height * ptPerPx
-
 
         pdf.addImage(imgData, "PNG", 40, 40, imgWidthPt, imgHeightPt)
         pdf.save(filename.endsWith(".pdf") ? filename : filename + ".pdf")
