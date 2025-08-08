@@ -1,3 +1,15 @@
+//TODO adjust constants
+//TODO adjust labels positions
+//TODO remove font size selector
+//TODO selector for scale (1/1, 1/2, 1/4)
+//TODO selector for gauge (1 cm / 10 cm)
+//TODO draw every marking if it's possible
+//TODO add a second ruler for row gauge
+//TODO vertical labels for row ruler
+//TODO update readme
+//TODO make a screenshot
+//TODO add favicon
+
 const ruler = {}
 
 const leftMargin = 30
