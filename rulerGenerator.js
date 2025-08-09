@@ -1,6 +1,6 @@
 //TODO adjust constants
 //TODO adjust labels positions
-//TODO remove font size selector
+//TODO remove height field
 //TODO selector for gauge (1 cm / 10 cm)
 //TODO draw every marking if it's possible
 //TODO add a second ruler for row gauge
@@ -22,13 +22,13 @@ const pixelsPerCm = drawDpi / cmPerInch
 const markingHeightMultiplier = 0.25
 const markingHeightCm = 0.8
 const markingHeightPixels = markingHeightCm * pixelsPerCm
+const fontSize = 26
 
 const canvasElementId = "rulerCanvas"
 
 const updateVariables = function () {
     ruler.widthCm = document.getElementById("rulerLength").value
     ruler.heightCm = document.getElementById("rulerHeight").value
-    ruler.fontSize = document.getElementById("fontSize").value
     ruler.scale = document.getElementById("scale").value
     ruler.widthPixels = pixelsPerCm * ruler.widthCm / ruler.scale
     ruler.heightPixels = pixelsPerCm * ruler.heightCm
@@ -68,7 +68,7 @@ const addMarkingLabel = function (x1, y2, isFinal, label) {
     text.style = {
         fontFamily: "monospace",
         fontWeight: "bold",
-        fontSize: ruler.fontSize
+        fontSize: fontSize
     }
     text.name = "Label no. " + label
 }
@@ -115,7 +115,7 @@ const addRulerInfo = function () {
     text.style = {
         fontFamily: "monospace",
         fontWeight: "bold",
-        fontSize: ruler.fontSize
+        fontSize: fontSize
     }
     text.name = "Ruler info"
 }
