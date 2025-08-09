@@ -1,6 +1,5 @@
 //TODO adjust constants
 //TODO adjust labels positions
-//TODO selector for gauge (1 cm / 10 cm)
 //TODO draw every marking if it's possible
 //TODO fix right border
 //TODO add a second ruler for row gauge
@@ -33,9 +32,10 @@ const updateVariables = function () {
     ruler.scale = document.getElementById("scale").value
     ruler.widthPixels = pixelsPerCm * ruler.widthCm / ruler.scale
     ruler.heightPixels = pixelsPerCm * ruler.heightCm
-    ruler.gauge = document.getElementById("gauge").value
-    ruler.widthStitches = ruler.widthCm * ruler.gauge
-    ruler.pixelsPerStitch = pixelsPerCm / ruler.gauge
+    ruler.gaugeSts = document.getElementById("gaugeSts").value
+    ruler.gaugeStsCm = document.getElementById("gaugeStsCm").value
+    ruler.widthStitches = ruler.widthCm * (ruler.gaugeSts / ruler.gaugeStsCm)
+    ruler.pixelsPerStitch = pixelsPerCm / (ruler.gaugeSts / ruler.gaugeStsCm)
 }
 
 const resizeCanvas = function () {
@@ -111,7 +111,7 @@ const addRulerInfo = function () {
     text.justification = "left"
 
     text.fillColor = "black"
-    text.content = "Scale 1/" + ruler.scale + "\nGauge " + ruler.gauge + " sts per 1 cm"
+    text.content = "Scale 1/" + ruler.scale + "\nGauge " + ruler.gaugeSts + " sts per " + ruler.gaugeStsCm + " cm"
 
     text.style = {
         fontFamily: "monospace",
