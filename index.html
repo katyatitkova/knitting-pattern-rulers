@@ -7,7 +7,12 @@
     <meta name="keywords" content="SVG ruler, Patternmaking ruler, Knitting ruler">
     <meta name="author" content="Katya Titkova">
     <style>
-        .selectors label {
+        .params {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .form-row {
             display: flex;
             gap: 10px;
             align-items: baseline;
@@ -32,35 +37,35 @@
                  class="octicon octicon-mark-github v-align-middle color-fg-default" style="text-align: right;">
                 <path d="M12.5.75C6.146.75 1 5.896 1 12.25c0 5.089 3.292 9.387 7.863 10.91.575.101.79-.244.79-.546 0-.273-.014-1.178-.014-2.142-2.889.532-3.636-.704-3.866-1.35-.13-.331-.69-1.352-1.18-1.625-.402-.216-.977-.748-.014-.762.906-.014 1.553.834 1.769 1.179 1.035 1.74 2.688 1.25 3.349.948.1-.747.402-1.25.733-1.538-2.559-.287-5.232-1.279-5.232-5.678 0-1.25.445-2.285 1.178-3.09-.115-.288-.517-1.467.115-3.048 0 0 .963-.302 3.163 1.179.92-.259 1.897-.388 2.875-.388.977 0 1.955.13 2.875.388 2.2-1.495 3.162-1.179 3.162-1.179.633 1.581.23 2.76.115 3.048.733.805 1.179 1.825 1.179 3.09 0 4.413-2.688 5.39-5.247 5.678.417.36.776 1.05.776 2.128 0 1.538-.014 2.774-.014 3.162 0 .302.216.662.79.547C20.709 21.637 24 17.324 24 12.25 24 5.896 18.854.75 12.5.75Z"></path>
             </svg>
-            <br/><span>Fork me on GitHub</span></a>
+            <br/>Fork me on GitHub</a>
     </div>
-    <div class="selectors" style="display:flex; flex-direction:column; gap:10px;">
+    <div class="params">
         <form id="rulerParameters" action="">
-            <label>
-                <span>Length (cm):</span>
-                <input id="rulerLength" type="number" value="50" min="1" max="100">
-            </label>
-            <label>
-                <span>Height (cm):</span>
-                <input id="rulerHeight" type="number" value="3" min="2" max="15">
-            </label>
-            <label>
-                <span>Scale:</span>
+            <div class="form-row">
+                <label for="rulerLength">Length (cm):</label>
+                <input id="rulerLength" type="number" value="50" min="1" max="100" step="0.1">
+            </div>
+            <div class="form-row">
+                <label for="rulerHeight">Height (cm):</label>
+                <input id="rulerHeight" type="number" value="3" min="2" max="15" step="0.1">
+            </div>
+            <div class="form-row">
+                <label for="scale">Scale:</label>
                 <select id="scale">
                     <option value="1">1/1</option>
                     <option value="2">1/2</option>
                     <option value="4" selected>1/4</option>
                 </select>
-            </label>
-            <label>
-                <span>Gauge (stitches/rows per 1 cm):</span>
-                <input id="gauge" type="number" value="3" min="1" max="10">
-            </label>
-        </form>
-        <form id="export" style="display:flex; gap:10px; align-items:baseline;">
-            <label for="filename">Filename:</label>
-            <input type="text" id="filename" value="ruler.pdf">
-            <input type="button" class="button" value="Download ruler as .pdf" id="exportButton">
+            </div>
+            <div class="form-row">
+                <label for="gauge">Gauge (stitches/rows per 1 cm):</label>
+                <input id="gauge" type="number" value="3" min="1" max="10" step="0.1">
+            </div>
+            <div class="form-row">
+                <label for="filename">Filename:</label>
+                <input type="text" id="filename" value="ruler.pdf">
+                <button type="button" id="exportButton">Download ruler as .pdf</button>
+            </div>
         </form>
     </div>
     <canvas id="rulerCanvas" style="display:block;"></canvas>

@@ -140,15 +140,18 @@ const constructRuler = function () {
 }
 
 const build = function () {
-    let canvas = document.getElementById(canvasElementId)
-
+    const canvas = document.getElementById(canvasElementId)
     paper.setup(canvas)
 
-    updateVariables()
-    resizeCanvas()
-    constructRuler()
+    const form = document.getElementById('rulerParameters');
 
-    paper.view.draw()
+    if (form.reportValidity()) {
+        updateVariables()
+        resizeCanvas()
+        constructRuler()
+
+        paper.view.draw()
+    }
 }
 
 const exportPdf = function () {
