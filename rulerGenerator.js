@@ -1,11 +1,11 @@
 //TODO adjust constants
 //TODO adjust labels positions
 //TODO remove font size selector
-//TODO selector for scale (1/1, 1/2, 1/4)
 //TODO selector for gauge (1 cm / 10 cm)
 //TODO draw every marking if it's possible
 //TODO add a second ruler for row gauge
 //TODO vertical labels for row ruler
+//TODO square option
 //TODO update readme
 //TODO make a screenshot
 //TODO add favicon
@@ -29,9 +29,7 @@ const updateVariables = function () {
     ruler.widthCm = document.getElementById("rulerLength").value
     ruler.heightCm = document.getElementById("rulerHeight").value
     ruler.fontSize = document.getElementById("fontSize").value
-    ruler.scale = document.getElementById("scale14").checked ?
-        document.getElementById("scale14").value :
-        document.getElementById("scale12").value
+    ruler.scale = document.getElementById("scale").value
     ruler.widthPixels = pixelsPerCm * ruler.widthCm / ruler.scale
     ruler.heightPixels = pixelsPerCm * ruler.heightCm
     ruler.gauge = document.getElementById("gauge").value
