@@ -9,11 +9,6 @@
 //TODO make a screenshot
 //TODO add favicon
 
-const ruler = {
-    heightCm: 3,
-    fontSize: 26
-}
-
 const leftMargin = 30
 const rightMargin = 60
 
@@ -21,26 +16,31 @@ const drawDpi = 300
 const pdfDpi = 72
 const cmPerInch = 2.54
 const pixelsPerCm = drawDpi / cmPerInch
-const markingHeightMultiplier = 0.25
-const markingHeightCm = 0.8
-const markingHeightPixels = markingHeightCm * pixelsPerCm
+const markingLengthMultiplier = 0.25
+const markingLengthCm = 0.8
+const markingLengthPixels = markingLengthCm * pixelsPerCm
 
 const canvasElementId = "rulerCanvas"
 
+const ruler = {
+    lengthPixels: pixelsPerCm * 18,
+    widthPixels: pixelsPerCm * 3,
+    fontSize: 26
+}
+
 const updateVariables = function () {
-    ruler.widthCm = document.getElementById("rulerLength").value
     ruler.scale = document.getElementById("scale").value
-    ruler.widthPixels = pixelsPerCm * ruler.widthCm / ruler.scale
-    ruler.heightPixels = pixelsPerCm * ruler.heightCm
-    ruler.gaugeSts = document.getElementById("gaugeSts").value
-    ruler.gaugeStsCm = document.getElementById("gaugeStsCm").value
-    ruler.widthStitches = ruler.widthCm * (ruler.gaugeSts / ruler.gaugeStsCm)
-    ruler.pixelsPerStitch = pixelsPerCm / (ruler.gaugeSts / ruler.gaugeStsCm)
+    ruler.sts = document.getElementById("sts").value
+    ruler.stsCm = document.getElementById("stsCm").value
+    ruler.gauge = ruler.sts / ruler.stsCm
+    ruler.lengthCm = ruler.lengthPixels / pixelsPerCm * ruler.scale
+    ruler.lengthStitches = ruler.lengthCm * ruler.gauge
+    ruler.pixelsPerStitch = pixelsPerCm / ruler.gauge
 }
 
 const resizeCanvas = function () {
-    let width = ruler.widthPixels + rightMargin
-    let height = ruler.heightPixels
+    let width = ruler.lengthPixels + rightMargin
+    let height = ruler.widthPixels
 
     document.getElementById(canvasElementId).width = width
     document.getElementById(canvasElementId).height = height
@@ -74,11 +74,11 @@ const addMarkingLabel = function (x1, y2, isFinal, label) {
     text.name = "Label no. " + label
 }
 
-const draw = function (index, height, spacing, assignNumber, isFinal) {
+const drawMarking = function (index, markingLength, spacing, assignNumber, isFinal) {
     let x1 = leftMargin + (spacing * index)
     let x2 = x1
     let y1 = 0
-    let y2 = height
+    let y2 = markingLength
 
     let line = new paper.Path.Line([x1, y1], [x2, y2])
     line.name = "Marking no. " + index
@@ -98,8 +98,8 @@ const drawBorder = function (name, x1, y1, x2, y2) {
 }
 
 const drawBorders = function () {
-    let width = ruler.widthPixels + rightMargin
-    let height = ruler.heightPixels
+    let width = ruler.lengthPixels + rightMargin
+    let height = ruler.widthPixels
     drawBorder("top", 0, 0, width, 0)
     drawBorder("bottom", 0, height, width, height)
     drawBorder("left", 0, 0, 0, height)
@@ -107,11 +107,11 @@ const drawBorders = function () {
 }
 
 const addRulerInfo = function () {
-    let text = new paper.PointText(new paper.Point(100, ruler.heightPixels - 100))
+    let text = new paper.PointText(new paper.Point(100, ruler.widthPixels - 100))
     text.justification = "left"
 
     text.fillColor = "black"
-    text.content = "Scale 1/" + ruler.scale + "\nGauge " + ruler.gaugeSts + " sts per " + ruler.gaugeStsCm + " cm"
+    text.content = "Scale 1/" + ruler.scale + ", gauge " + ruler.sts + " sts per " + ruler.stsCm + " cm"
 
     text.style = {
         fontFamily: "monospace",
@@ -124,17 +124,17 @@ const addRulerInfo = function () {
 const constructRuler = function () {
     let isFinal = false
     let distance = 2
-    for (let i = 0; i <= ruler.widthStitches; i += distance) {
-        let height = markingHeightPixels
+    for (let i = 0; i <= ruler.lengthStitches; i += distance) {
+        let markingLength = markingLengthPixels
         let spacing =  ruler.pixelsPerStitch / ruler.scale
         let assignNumber = (i % 10 === 0)
         if (!assignNumber) {
-            height = height * markingHeightMultiplier
+            markingLength = markingLength * markingLengthMultiplier
         }
-        if (i === ruler.widthStitches) {
+        if (i === ruler.lengthStitches) {
             isFinal = true
         }
-        draw(i, height, spacing, assignNumber, isFinal)
+        drawMarking(i, markingLength, spacing, assignNumber, isFinal)
     }
     drawBorders()
     addRulerInfo()

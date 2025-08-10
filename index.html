@@ -17,6 +17,9 @@
             gap: 10px;
             align-items: baseline;
         }
+        .no-margin {
+            margin-right: 0px;
+        }
     </style>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.min.css">
     <script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js'></script>
@@ -42,8 +45,14 @@
     <div class="params">
         <form id="rulerParameters" action="">
             <div class="form-row">
-                <label for="rulerLength">Length (cm):</label>
-                <input id="rulerLength" type="number" value="50" min="1" max="100" step="0.1">
+                <label for="sts">Stitch gauge:</label>
+                <input id="sts" class="no-margin" type="number" value="30" min="1" max="100" step="0.1">
+                <label for="stsCm">stitches per</label>
+                <select id="stsCm" class="no-margin">
+                    <option value="1">1</option>
+                    <option value="10" selected>10</option>
+                </select>
+                cm
             </div>
             <div class="form-row">
                 <label for="scale">Scale:</label>
@@ -52,16 +61,6 @@
                     <option value="2">1/2</option>
                     <option value="4" selected>1/4</option>
                 </select>
-            </div>
-            <div class="form-row">
-                <label for="gaugeSts">Stitch gauge:</label>
-                <input id="gaugeSts" type="number" value="30" style="margin-right:0px" min="1" max="100" step="0.1">
-                <label for="gaugeStsCm">stitches per</label>
-                <select id="gaugeStsCm" style="margin-right:0px">
-                    <option value="1">1</option>
-                    <option value="10" selected>10</option>
-                </select>
-                cm
             </div>
             <div class="form-row">
                 <label for="filename">Filename:</label>
