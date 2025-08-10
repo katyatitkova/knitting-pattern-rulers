@@ -12,29 +12,29 @@ const betweenRulers = 100
 const drawDpi = 300
 const pdfDpi = 72
 const cmPerInch = 2.54
-const pixelsPerCm = drawDpi / cmPerInch
+const pxPerCm = drawDpi / cmPerInch
 const marking10LengthCm = 0.8
-const marking10LengthPixels = marking10LengthCm * pixelsPerCm
-const marking5LengthPixels = marking10LengthPixels / 2
-const marking1LengthPixels = marking5LengthPixels / 2
-const markingMicroLengthPixels = marking1LengthPixels / 3
+const marking10LengthPx = marking10LengthCm * pxPerCm
+const marking5LengthPx = marking10LengthPx / 2
+const marking1LengthPx = marking5LengthPx / 2
+const markingMicroLengthPx = marking1LengthPx / 3
 const fontSize = 26
 const rulerShortCm = 17
 const rulerLongCm = 26
 const rulerWidthCm = 3
-const rulerWidthPixels = pixelsPerCm * rulerWidthCm
+const rulerWidthPx = pxPerCm * rulerWidthCm
 const gaugeCm = 10
 
 const canvasElementId = "rulerCanvas"
 
 const stsRuler = {
-    widthPixels: rulerWidthPixels,
+    widthPx: rulerWidthPx,
     unit: "stitches",
     verticalMarkings: false,
 }
 
 const rowsRuler = {
-    widthPixels: rulerWidthPixels,
+    widthPx: rulerWidthPx,
     unit: "rows",
     verticalMarkings: true,
 }
@@ -46,47 +46,47 @@ const updateVariables = function () {
         stsRuler.square = true
         stsRuler.isVertical = false
         stsRuler.verticalMarkings = false
-        stsRuler.lengthPixels = pixelsPerCm * rulerShortCm
+        stsRuler.lengthPx = pxPerCm * rulerShortCm
         stsRuler.startX = 0
         stsRuler.startY = 0
 
         rowsRuler.square = true
         rowsRuler.isVertical = true
         rowsRuler.verticalMarkings = false
-        rowsRuler.lengthPixels = pixelsPerCm * rulerLongCm
+        rowsRuler.lengthPx = pxPerCm * rulerLongCm
         rowsRuler.startX = 0
         rowsRuler.startY = 0
     } else {
         stsRuler.square = false
         stsRuler.isVertical = false
         stsRuler.verticalMarkings = false
-        stsRuler.lengthPixels = pixelsPerCm * rulerLongCm
+        stsRuler.lengthPx = pxPerCm * rulerLongCm
         stsRuler.startX = 0
         stsRuler.startY = 0
 
         rowsRuler.square = false
         rowsRuler.isVertical = false
         rowsRuler.verticalMarkings = true
-        rowsRuler.lengthPixels = pixelsPerCm * rulerLongCm
+        rowsRuler.lengthPx = pxPerCm * rulerLongCm
         rowsRuler.startX = 0
-        rowsRuler.startY = rulerWidthPixels + betweenRulers
+        rowsRuler.startY = rulerWidthPx + betweenRulers
     }
 
     stsRuler.sts = document.getElementById("sts").value
     stsRuler.scale = document.getElementById("scale").value
 
     stsRuler.gauge = stsRuler.sts / gaugeCm
-    stsRuler.lengthCm = stsRuler.lengthPixels / pixelsPerCm * stsRuler.scale
+    stsRuler.lengthCm = stsRuler.lengthPx / pxPerCm * stsRuler.scale
     stsRuler.lengthStitches = stsRuler.lengthCm * stsRuler.gauge
-    stsRuler.pixelsPerStitch = pixelsPerCm / stsRuler.gauge
+    stsRuler.pxPerStitch = pxPerCm / stsRuler.gauge
 
     rowsRuler.sts = document.getElementById("rows").value
     rowsRuler.scale = document.getElementById("scale").value
 
     rowsRuler.gauge = rowsRuler.sts / gaugeCm
-    rowsRuler.lengthCm = rowsRuler.lengthPixels / pixelsPerCm * rowsRuler.scale
+    rowsRuler.lengthCm = rowsRuler.lengthPx / pxPerCm * rowsRuler.scale
     rowsRuler.lengthStitches = rowsRuler.lengthCm * rowsRuler.gauge
-    rowsRuler.pixelsPerStitch = pixelsPerCm / rowsRuler.gauge
+    rowsRuler.pxPerStitch = pxPerCm / rowsRuler.gauge
 
     document.getElementById("filename").value = "ruler_"
         + stsRuler.sts.toString().replace(/\./g, "_")
@@ -98,8 +98,8 @@ const updateVariables = function () {
 }
 
 const resizeCanvas = function () {
-    let width = stsRuler.lengthPixels + rightMargin + 1
-    let height = (rowsRuler.isVertical ? rowsRuler.lengthPixels + rightMargin : rowsRuler.startY + rowsRuler.widthPixels) + 1
+    let width = stsRuler.lengthPx + rightMargin + 1
+    let height = (rowsRuler.isVertical ? rowsRuler.lengthPx + rightMargin : rowsRuler.startY + rowsRuler.widthPx) + 1
 
     document.getElementById(canvasElementId).width = width
     document.getElementById(canvasElementId).height = height
@@ -199,11 +199,11 @@ const drawRulerBorders = function (ruler) {
 }
 
 const drawBorders = function () {
-    stsRuler.endX = stsRuler.startX + stsRuler.lengthPixels + rightMargin
-    stsRuler.endY = stsRuler.startY + stsRuler.widthPixels
+    stsRuler.endX = stsRuler.startX + stsRuler.lengthPx + rightMargin
+    stsRuler.endY = stsRuler.startY + stsRuler.widthPx
 
-    rowsRuler.endX = rowsRuler.startX + (rowsRuler.isVertical ? rowsRuler.widthPixels : rowsRuler.lengthPixels + rightMargin)
-    rowsRuler.endY = rowsRuler.startY + (rowsRuler.isVertical ? rowsRuler.lengthPixels + rightMargin : rowsRuler.widthPixels)
+    rowsRuler.endX = rowsRuler.startX + (rowsRuler.isVertical ? rowsRuler.widthPx : rowsRuler.lengthPx + rightMargin)
+    rowsRuler.endY = rowsRuler.startY + (rowsRuler.isVertical ? rowsRuler.lengthPx + rightMargin : rowsRuler.widthPx)
 
     if (stsRuler.square) {
         drawBorder("top", stsRuler.startX, stsRuler.startY, stsRuler.endX, stsRuler.startY)
@@ -219,8 +219,8 @@ const drawBorders = function () {
 }
 
 const addRulerInfo = function (ruler) {
-    let x = ruler.lengthPixels - 50
-    let y = ruler.startY + ruler.widthPixels - 100
+    let x = ruler.lengthPx - 50
+    let y = ruler.startY + ruler.widthPx - 100
     let startingPoint = new paper.Point(x, y)
     if (ruler.isVertical) {
         startingPoint = new paper.Point(y, x)
@@ -246,7 +246,7 @@ const addRulerInfo = function (ruler) {
 }
 
 const getMarkings = function (ruler) {
-    let spacing =  ruler.pixelsPerStitch / ruler.scale
+    let spacing =  ruler.pxPerStitch / ruler.scale
     let distance = (spacing < 10) ? 2 : 1
     let markings = []
     for (let i = 0; i <= ruler.lengthStitches; i++) {
@@ -259,10 +259,10 @@ const getMarkings = function (ruler) {
             })
             continue
         }
-        let markingLength = marking10LengthPixels
+        let markingLength = marking10LengthPx
         let assignNumber = (i % 10 === 0)
         if (!assignNumber) {
-            markingLength = (i % 5 === 0) ? marking5LengthPixels : marking1LengthPixels
+            markingLength = (i % 5 === 0) ? marking5LengthPx : marking1LengthPx
         }
         let points = calculateMarking(ruler, i, markingLength, spacing)
         if (points != null) {
@@ -286,10 +286,10 @@ const drawMarkings = function(stsRulerMarkings, rowsRulerMarkings) {
                 stsRulerMarkings[i].assignNumber = false
                 rowsRulerMarkings[i].assignNumber = false
                 if ((i > 0) && (pointsNearby(stsRulerMarkings[i - 1].point2, rowsRulerMarkings[i].point2))) {
-                    stsRulerMarkings[i - 1].point2.y = stsRulerMarkings[i - 1].point1.y + markingMicroLengthPixels
+                    stsRulerMarkings[i - 1].point2.y = stsRulerMarkings[i - 1].point1.y + markingMicroLengthPx
                 }
                 if ((i > 0) && (pointsNearby(rowsRulerMarkings[i - 1].point2, stsRulerMarkings[i].point2))) {
-                    rowsRulerMarkings[i - 1].point2.x = rowsRulerMarkings[i - 1].point1.x + markingMicroLengthPixels
+                    rowsRulerMarkings[i - 1].point2.x = rowsRulerMarkings[i - 1].point1.x + markingMicroLengthPx
                 }
             }
         }
