@@ -1,6 +1,6 @@
+//TODO test printing for 1 stitch markings
 //TODO adjust constants
 //TODO adjust labels positions
-//TODO draw every marking if it's possible
 //TODO update readme
 //TODO make a screenshot
 //TODO add favicon
@@ -13,9 +13,11 @@ const drawDpi = 300
 const pdfDpi = 72
 const cmPerInch = 2.54
 const pixelsPerCm = drawDpi / cmPerInch
-const markingLengthMultiplier = 0.25
-const markingLengthCm = 0.8
-const markingLengthPixels = markingLengthCm * pixelsPerCm
+const marking10LengthCm = 0.8
+const marking10LengthPixels = marking10LengthCm * pixelsPerCm
+const marking5LengthPixels = marking10LengthPixels / 2
+const marking1LengthPixels = marking5LengthPixels / 2
+const markingMicroLengthPixels = marking1LengthPixels / 3
 const fontSize = 26
 const rulerShortCm = 17
 const rulerLongCm = 26
@@ -136,6 +138,9 @@ const calculateMarking = function (ruler, index, markingLength, spacing) {
 }
 
 const drawMarking = function (ruler, point1, point2, index, assignNumber) {
+    if ((point1 === null) || (point2 === null)) {
+        return
+    }
     let line = new paper.Path.Line([point1.x, point1.y], [point2.x, point2.y])
     line.name = ruler.unit + " marking no. " + index
     line.strokeColor = "black"
@@ -241,14 +246,23 @@ const addRulerInfo = function (ruler) {
 }
 
 const getMarkings = function (ruler) {
-    let distance = 2
+    let spacing =  ruler.pixelsPerStitch / ruler.scale
+    let distance = (spacing < 10) ? 2 : 1
     let markings = []
-    for (let i = 0; i <= ruler.lengthStitches; i += distance) {
-        let markingLength = markingLengthPixels
-        let spacing =  ruler.pixelsPerStitch / ruler.scale
+    for (let i = 0; i <= ruler.lengthStitches; i++) {
+        if (i % distance !== 0) {
+            markings.push({
+                point1: null,
+                point2: null,
+                index: i,
+                assignNumber: false
+            })
+            continue
+        }
+        let markingLength = marking10LengthPixels
         let assignNumber = (i % 10 === 0)
         if (!assignNumber) {
-            markingLength = markingLength * markingLengthMultiplier
+            markingLength = (i % 5 === 0) ? marking5LengthPixels : marking1LengthPixels
         }
         let points = calculateMarking(ruler, i, markingLength, spacing)
         if (points != null) {
@@ -258,7 +272,6 @@ const getMarkings = function (ruler) {
                 index: i,
                 assignNumber: assignNumber
             })
-            drawMarking(ruler, i, markingLength, spacing, assignNumber)
         }
     }
     return markings
@@ -272,6 +285,12 @@ const drawMarkings = function(stsRulerMarkings, rowsRulerMarkings) {
                 rowsRulerMarkings[i].point2.x = stsRulerMarkings[i].point2.x
                 stsRulerMarkings[i].assignNumber = false
                 rowsRulerMarkings[i].assignNumber = false
+                if ((i > 0) && (pointsNearby(stsRulerMarkings[i - 1].point2, rowsRulerMarkings[i].point2))) {
+                    stsRulerMarkings[i - 1].point2.y = stsRulerMarkings[i - 1].point1.y + markingMicroLengthPixels
+                }
+                if ((i > 0) && (pointsNearby(rowsRulerMarkings[i - 1].point2, stsRulerMarkings[i].point2))) {
+                    rowsRulerMarkings[i - 1].point2.x = rowsRulerMarkings[i - 1].point1.x + markingMicroLengthPixels
+                }
             }
         }
     }
@@ -280,6 +299,9 @@ const drawMarkings = function(stsRulerMarkings, rowsRulerMarkings) {
 }
 
 const pointsNearby = function(point1, point2) {
+    if ((point1 === null) || (point2 === null)) {
+        return false
+    }
     const delta = 10
     return (Math.abs(point1.x - point2.x) < delta) || (Math.abs(point1.y - point2.y) < delta)
 }
