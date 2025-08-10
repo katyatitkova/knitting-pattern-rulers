@@ -1,7 +1,5 @@
 //TODO adjust constants
 //TODO adjust labels positions
-//TODO adjust labels for square
-//TODO adjust marking lengths for square
 //TODO draw every marking if it's possible
 //TODO adjust pdf name for gauge
 //TODO update readme
@@ -102,9 +100,9 @@ const resizeCanvas = function () {
     document.getElementById(canvasElementId).style.height = (height / 3) + 'px'
 }
 
-const drawMarking = function (ruler, index, markingLength, spacing, assignNumber) {
+const calculateMarking = function (ruler, index, markingLength, spacing) {
     if (ruler.square && (index === 0)) {
-        return
+        return null
     }
 
     let x1 = ruler.startX + (spacing * index) + (ruler.square? 0 : leftMargin)
@@ -119,17 +117,30 @@ const drawMarking = function (ruler, index, markingLength, spacing, assignNumber
         y2 = y1
     }
 
-    let line = new paper.Path.Line([x1, y1], [x2, y2])
+    return {
+        point1: {
+            x: x1,
+            y: y1
+        },
+        point2: {
+            x: x2,
+            y: y2
+        }
+    }
+}
+
+const drawMarking = function (ruler, point1, point2, index, assignNumber) {
+    let line = new paper.Path.Line([point1.x, point1.y], [point2.x, point2.y])
     line.name = ruler.unit + " marking no. " + index
     line.strokeColor = "black"
     line.strokeWidth = "1"
 
     if (assignNumber) {
-        addMarkingLabel(ruler, x2, y2, index)
+        addMarkingLabel(ruler, point2, index)
     }
 }
 
-const addMarkingLabel = function (ruler, x, y, label) {
+const addMarkingLabel = function (ruler, point, label) {
     let xLabelOffset = -15
     let yLabelOffset = 30
 
@@ -143,7 +154,7 @@ const addMarkingLabel = function (ruler, x, y, label) {
         yLabelOffset = 10
     }
 
-    let startingPoint = new paper.Point(x + xLabelOffset, y + yLabelOffset)
+    let startingPoint = new paper.Point(point.x + xLabelOffset, point.y + yLabelOffset)
     let text = new paper.PointText(startingPoint)
     text.justification = "left"
 
@@ -224,6 +235,7 @@ const addRulerInfo = function (ruler) {
 
 const constructRuler = function (ruler) {
     let distance = 2
+    let markings = []
     for (let i = 0; i <= ruler.lengthStitches; i += distance) {
         let markingLength = markingLengthPixels
         let spacing =  ruler.pixelsPerStitch / ruler.scale
@@ -231,7 +243,43 @@ const constructRuler = function (ruler) {
         if (!assignNumber) {
             markingLength = markingLength * markingLengthMultiplier
         }
-        drawMarking(ruler, i, markingLength, spacing, assignNumber)
+        let points = calculateMarking(ruler, i, markingLength, spacing)
+        if (points != null) {
+            markings.push({
+                point1: points.point1,
+                point2: points.point2,
+                index: i,
+                assignNumber: assignNumber
+            })
+            drawMarking(ruler, i, markingLength, spacing, assignNumber)
+        }
+    }
+    return markings
+}
+
+const drawMarkings = function(stsRulerMarkings, rowsRulerMarkings) {
+    if (stsRuler.square) {
+        for (let i = 0; i <= 20; i++) {
+            if (pointsNearby(stsRulerMarkings[i].point2, rowsRulerMarkings[i].point2)) {
+                stsRulerMarkings[i].point2.y = rowsRulerMarkings[i].point2.y
+                rowsRulerMarkings[i].point2.x = stsRulerMarkings[i].point2.x
+                stsRulerMarkings[i].assignNumber = false
+                rowsRulerMarkings[i].assignNumber = false
+            }
+        }
+    }
+    drawRulerMarkings(stsRuler, stsRulerMarkings)
+    drawRulerMarkings(rowsRuler, rowsRulerMarkings)
+}
+
+const pointsNearby = function(point1, point2) {
+    const delta = 10
+    return (Math.abs(point1.x - point2.x) < delta) || (Math.abs(point1.y - point2.y) < delta)
+}
+
+const drawRulerMarkings = function(ruler, rulerMarkings) {
+    for (let m of rulerMarkings) {
+        drawMarking(ruler, m.point1, m.point2, m.index, m.assignNumber)
     }
 }
 
@@ -244,8 +292,9 @@ const build = function () {
     if (form.reportValidity()) {
         updateVariables()
         resizeCanvas()
-        constructRuler(stsRuler)
-        constructRuler(rowsRuler)
+        const stsRulerMarkings = constructRuler(stsRuler)
+        const rowsRulerMarkings = constructRuler(rowsRuler)
+        drawMarkings(stsRulerMarkings, rowsRulerMarkings)
         drawBorders()
         addRulerInfo(stsRuler)
         addRulerInfo(rowsRuler)
