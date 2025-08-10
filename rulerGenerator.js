@@ -1,7 +1,6 @@
 //TODO adjust constants
 //TODO adjust labels positions
 //TODO draw every marking if it's possible
-//TODO vertical labels for row ruler
 //TODO square option
 //TODO update readme
 //TODO make a screenshot
@@ -30,6 +29,7 @@ const stsRuler = {
     unit: "stitches",
     startX: 0,
     startY: 0,
+    isVertical: false,
 }
 
 const rowsRuler = {
@@ -38,6 +38,7 @@ const rowsRuler = {
     unit: "rows",
     startX: 0,
     startY: rulerWidthPixels + betweenRulers,
+    isVertical: true,
 }
 
 const updateVariables = function () {
@@ -75,8 +76,13 @@ const addMarkingLabel = function (ruler, x, y, isFinal, label) {
     let xLabelOffset = -15
     let yLabelOffset = 30
 
-    if (isFinal) { // last label is right justified
-        xLabelOffset = -1 * xLabelOffset
+    if (ruler.isVertical) {
+        xLabelOffset = 0
+        yLabelOffset = 40
+    } else {
+        if (isFinal) { // last label is right justified
+            xLabelOffset = -1 * xLabelOffset
+        }
     }
 
     let text = new paper.PointText(new paper.Point(x + xLabelOffset, y + yLabelOffset))
@@ -94,6 +100,11 @@ const addMarkingLabel = function (ruler, x, y, isFinal, label) {
         fontSize: fontSize
     }
     text.name = ruler.unit + " label no. " + label
+
+    if (ruler.isVertical) {
+        text.justification = "center"
+        text.rotate(90)
+    }
 }
 
 const drawMarking = function (ruler, index, markingLength, spacing, assignNumber, isFinal) {
