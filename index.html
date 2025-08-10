@@ -15,7 +15,7 @@
         .form-row {
             display: flex;
             gap: 10px;
-            align-items: baseline;
+            align-items: center;
         }
         .no-margin {
             margin-right: 0px;
@@ -45,25 +45,22 @@
     <div class="params">
         <form id="rulerParameters" action="">
             <div class="form-row">
-                <label>Gauge:</label>
-            </div>
-            <div class="form-row">
                 <input id="sts" class="no-margin" type="number" value="30" min="1" max="100" step="0.1">
-                <label for="stsCm">stitches per</label>
+                <label for="sts">stitches per</label>
                 <select id="stsCm" class="no-margin">
                     <option value="1">1</option>
                     <option value="10" selected>10</option>
                 </select>
-                <span>cm</span>
+                <label for="stsCm">cm</label>
             </div>
             <div class="form-row">
                 <input id="rows" class="no-margin" type="number" value="30" min="1" max="100" step="0.1">
-                <label for="rowsCm">rows per</label>
+                <label for="rows">rows per</label>
                 <select id="rowsCm" class="no-margin">
                     <option value="1">1</option>
                     <option value="10" selected>10</option>
                 </select>
-                <span>cm</span>
+                <label for="rowsCm">cm</label>
             </div>
             <div class="form-row">
                 <label for="scale">Scale:</label>
@@ -72,6 +69,8 @@
                     <option value="2">1/2</option>
                     <option value="4" selected>1/4</option>
                 </select>
+                <input type="checkbox" id="square" checked>
+                <label for="square">Generate a steel square ruler</label>
             </div>
             <div class="form-row">
                 <label for="filename">Filename:</label>

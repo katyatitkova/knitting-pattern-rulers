@@ -1,7 +1,9 @@
 //TODO adjust constants
 //TODO adjust labels positions
+//TODO adjust labels for square
+//TODO adjust marking lengths for square
 //TODO draw every marking if it's possible
-//TODO square option
+//TODO adjust pdf name for gauge
 //TODO update readme
 //TODO make a screenshot
 //TODO add favicon
@@ -18,30 +20,58 @@ const markingLengthMultiplier = 0.25
 const markingLengthCm = 0.8
 const markingLengthPixels = markingLengthCm * pixelsPerCm
 const fontSize = 26
+const rulerShortCm = 17
+const rulerLongCm = 26
 const rulerWidthCm = 3
 const rulerWidthPixels = pixelsPerCm * rulerWidthCm
 
 const canvasElementId = "rulerCanvas"
 
 const stsRuler = {
-    lengthPixels: pixelsPerCm * 25,
     widthPixels: rulerWidthPixels,
     unit: "stitches",
-    startX: 0,
-    startY: 0,
-    isVertical: false,
+    verticalMarkings: false,
 }
 
 const rowsRuler = {
-    lengthPixels: pixelsPerCm * 25,
     widthPixels: rulerWidthPixels,
     unit: "rows",
-    startX: 0,
-    startY: rulerWidthPixels + betweenRulers,
-    isVertical: true,
+    verticalMarkings: true,
 }
 
 const updateVariables = function () {
+    const square = document.getElementById("square").checked
+
+    if (square) {
+        stsRuler.square = true
+        stsRuler.isVertical = false
+        stsRuler.verticalMarkings = false
+        stsRuler.lengthPixels = pixelsPerCm * rulerShortCm
+        stsRuler.startX = 0
+        stsRuler.startY = 0
+
+        rowsRuler.square = true
+        rowsRuler.isVertical = true
+        rowsRuler.verticalMarkings = false
+        rowsRuler.lengthPixels = pixelsPerCm * rulerLongCm
+        rowsRuler.startX = 0
+        rowsRuler.startY = 0
+    } else {
+        stsRuler.square = false
+        stsRuler.isVertical = false
+        stsRuler.verticalMarkings = false
+        stsRuler.lengthPixels = pixelsPerCm * rulerLongCm
+        stsRuler.startX = 0
+        stsRuler.startY = 0
+
+        rowsRuler.square = false
+        rowsRuler.isVertical = false
+        rowsRuler.verticalMarkings = true
+        rowsRuler.lengthPixels = pixelsPerCm * rulerLongCm
+        rowsRuler.startX = 0
+        rowsRuler.startY = rulerWidthPixels + betweenRulers
+    }
+
     stsRuler.sts = document.getElementById("sts").value
     stsRuler.stsCm = document.getElementById("stsCm").value
     stsRuler.scale = document.getElementById("scale").value
@@ -63,7 +93,7 @@ const updateVariables = function () {
 
 const resizeCanvas = function () {
     let width = stsRuler.lengthPixels + rightMargin + 1
-    let height = rowsRuler.startY + rowsRuler.widthPixels + 1
+    let height = (rowsRuler.isVertical ? rowsRuler.lengthPixels + rightMargin : rowsRuler.startY + rowsRuler.widthPixels) + 1
 
     document.getElementById(canvasElementId).width = width
     document.getElementById(canvasElementId).height = height
@@ -72,24 +102,50 @@ const resizeCanvas = function () {
     document.getElementById(canvasElementId).style.height = (height / 3) + 'px'
 }
 
-const addMarkingLabel = function (ruler, x, y, isFinal, label) {
+const drawMarking = function (ruler, index, markingLength, spacing, assignNumber) {
+    if (ruler.square && (index === 0)) {
+        return
+    }
+
+    let x1 = ruler.startX + (spacing * index) + (ruler.square? 0 : leftMargin)
+    let x2 = x1
+    let y1 = ruler.startY
+    let y2 = ruler.startY + markingLength
+
+    if (ruler.isVertical) {
+        x1 = ruler.startX
+        x2 = x1 + markingLength
+        y1 = ruler.startY + (spacing * index)
+        y2 = y1
+    }
+
+    let line = new paper.Path.Line([x1, y1], [x2, y2])
+    line.name = ruler.unit + " marking no. " + index
+    line.strokeColor = "black"
+    line.strokeWidth = "1"
+
+    if (assignNumber) {
+        addMarkingLabel(ruler, x2, y2, index)
+    }
+}
+
+const addMarkingLabel = function (ruler, x, y, label) {
     let xLabelOffset = -15
     let yLabelOffset = 30
 
-    if (ruler.isVertical) {
-        xLabelOffset = 0
-        yLabelOffset = 40
-    } else {
-        if (isFinal) { // last label is right justified
-            xLabelOffset = -1 * xLabelOffset
-        }
+    if (ruler.verticalMarkings) {
+        xLabelOffset = -10
+        yLabelOffset = 10
     }
 
-    let text = new paper.PointText(new paper.Point(x + xLabelOffset, y + yLabelOffset))
-    text.justification = "left"
-    if (isFinal) { // last label is right justified
-        text.justification = "right"
+    if (ruler.isVertical) {
+        xLabelOffset = 10
+        yLabelOffset = 10
     }
+
+    let startingPoint = new paper.Point(x + xLabelOffset, y + yLabelOffset)
+    let text = new paper.PointText(startingPoint)
+    text.justification = "left"
 
     text.fillColor = "black"
     text.content = label
@@ -101,25 +157,8 @@ const addMarkingLabel = function (ruler, x, y, isFinal, label) {
     }
     text.name = ruler.unit + " label no. " + label
 
-    if (ruler.isVertical) {
-        text.justification = "center"
-        text.rotate(90)
-    }
-}
-
-const drawMarking = function (ruler, index, markingLength, spacing, assignNumber, isFinal) {
-    let x1 = ruler.startX + leftMargin + (spacing * index)
-    let x2 = x1
-    let y1 = ruler.startY
-    let y2 = ruler.startY + markingLength
-
-    let line = new paper.Path.Line([x1, y1], [x2, y2])
-    line.name = ruler.unit + " marking no. " + index
-    line.strokeColor = "black"
-    line.strokeWidth = "1"
-
-    if (assignNumber) {
-        addMarkingLabel(ruler, x1, y2, isFinal, index)
+    if (ruler.verticalMarkings) {
+        text.rotate(90, startingPoint)
     }
 }
 
@@ -130,18 +169,43 @@ const drawBorder = function (name, x1, y1, x2, y2) {
     topLine.strokeWidth = "1"
 }
 
-const drawBorders = function (ruler) {
-    ruler.endX = ruler.startX + ruler.lengthPixels + rightMargin
-    ruler.endY = ruler.startY + ruler.widthPixels
+const drawRulerBorders = function (ruler) {
     drawBorder(ruler.unit + " top", ruler.startX, ruler.startY, ruler.endX, ruler.startY)
     drawBorder(ruler.unit + " bottom", ruler.startX, ruler.endY, ruler.endX, ruler.endY)
     drawBorder(ruler.unit + " left", ruler.startX, ruler.startY, ruler.startX, ruler.endY)
     drawBorder(ruler.unit + " right", ruler.endX, ruler.startY, ruler.endX, ruler.endY)
 }
 
+const drawBorders = function () {
+    stsRuler.endX = stsRuler.startX + stsRuler.lengthPixels + rightMargin
+    stsRuler.endY = stsRuler.startY + stsRuler.widthPixels
+
+    rowsRuler.endX = rowsRuler.startX + (rowsRuler.isVertical ? rowsRuler.widthPixels : rowsRuler.lengthPixels + rightMargin)
+    rowsRuler.endY = rowsRuler.startY + (rowsRuler.isVertical ? rowsRuler.lengthPixels + rightMargin : rowsRuler.widthPixels)
+
+    if (stsRuler.square) {
+        drawBorder("top", stsRuler.startX, stsRuler.startY, stsRuler.endX, stsRuler.startY)
+        drawBorder("left", rowsRuler.startX, rowsRuler.startY, rowsRuler.startX, rowsRuler.endY)
+        drawBorder("outer right", stsRuler.endX, stsRuler.startY, stsRuler.endX, stsRuler.endY)
+        drawBorder("inner right", rowsRuler.endX, stsRuler.endY, rowsRuler.endX, rowsRuler.endY)
+        drawBorder("outer bottom", rowsRuler.startX, rowsRuler.endY, rowsRuler.endX, rowsRuler.endY)
+        drawBorder("inner bottom", rowsRuler.endX, stsRuler.endY, stsRuler.endX, stsRuler.endY)
+    } else {
+        drawRulerBorders(stsRuler)
+        drawRulerBorders(rowsRuler)
+    }
+}
+
 const addRulerInfo = function (ruler) {
-    let text = new paper.PointText(new paper.Point(ruler.startX + 100, ruler.startY + ruler.widthPixels - 100))
-    text.justification = "left"
+    let x = ruler.lengthPixels - 50
+    let y = ruler.startY + ruler.widthPixels - 100
+    let startingPoint = new paper.Point(x, y)
+    if (ruler.isVertical) {
+        startingPoint = new paper.Point(y, x)
+    }
+
+    let text = new paper.PointText(startingPoint)
+    text.justification = "right"
 
     text.fillColor = "black"
     text.content = "Scale 1/" + ruler.scale + ", gauge " + ruler.sts + " " + ruler.unit + " per " + ruler.stsCm + " cm"
@@ -152,10 +216,13 @@ const addRulerInfo = function (ruler) {
         fontSize: fontSize
     }
     text.name = ruler.unit + " ruler info "
+
+    if (ruler.isVertical) {
+        text.rotate(90, startingPoint)
+    }
 }
 
 const constructRuler = function (ruler) {
-    let isFinal = false
     let distance = 2
     for (let i = 0; i <= ruler.lengthStitches; i += distance) {
         let markingLength = markingLengthPixels
@@ -164,13 +231,8 @@ const constructRuler = function (ruler) {
         if (!assignNumber) {
             markingLength = markingLength * markingLengthMultiplier
         }
-        if (i === ruler.lengthStitches) {
-            isFinal = true
-        }
-        drawMarking(ruler, i, markingLength, spacing, assignNumber, isFinal)
+        drawMarking(ruler, i, markingLength, spacing, assignNumber)
     }
-    drawBorders(ruler)
-    addRulerInfo(ruler)
 }
 
 const build = function () {
@@ -184,6 +246,9 @@ const build = function () {
         resizeCanvas()
         constructRuler(stsRuler)
         constructRuler(rowsRuler)
+        drawBorders()
+        addRulerInfo(stsRuler)
+        addRulerInfo(rowsRuler)
 
         paper.view.draw()
     }
@@ -199,7 +264,7 @@ const exportPdf = function () {
         const { jsPDF } = window.jspdf
 
         const pdf = new jsPDF({
-            orientation: "landscape",
+            orientation: canvas.width > canvas.height ? "landscape" : "portrait",
             unit: "pt",
             format: "a4"
         })
