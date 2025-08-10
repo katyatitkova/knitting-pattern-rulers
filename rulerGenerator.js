@@ -1,7 +1,6 @@
 //TODO adjust constants
 //TODO adjust labels positions
 //TODO draw every marking if it's possible
-//TODO adjust pdf name for gauge
 //TODO update readme
 //TODO make a screenshot
 //TODO add favicon
@@ -22,6 +21,7 @@ const rulerShortCm = 17
 const rulerLongCm = 26
 const rulerWidthCm = 3
 const rulerWidthPixels = pixelsPerCm * rulerWidthCm
+const gaugeCm = 10
 
 const canvasElementId = "rulerCanvas"
 
@@ -71,22 +71,28 @@ const updateVariables = function () {
     }
 
     stsRuler.sts = document.getElementById("sts").value
-    stsRuler.stsCm = document.getElementById("stsCm").value
     stsRuler.scale = document.getElementById("scale").value
 
-    stsRuler.gauge = stsRuler.sts / stsRuler.stsCm
+    stsRuler.gauge = stsRuler.sts / gaugeCm
     stsRuler.lengthCm = stsRuler.lengthPixels / pixelsPerCm * stsRuler.scale
     stsRuler.lengthStitches = stsRuler.lengthCm * stsRuler.gauge
     stsRuler.pixelsPerStitch = pixelsPerCm / stsRuler.gauge
 
     rowsRuler.sts = document.getElementById("rows").value
-    rowsRuler.stsCm = document.getElementById("rowsCm").value
     rowsRuler.scale = document.getElementById("scale").value
 
-    rowsRuler.gauge = rowsRuler.sts / rowsRuler.stsCm
+    rowsRuler.gauge = rowsRuler.sts / gaugeCm
     rowsRuler.lengthCm = rowsRuler.lengthPixels / pixelsPerCm * rowsRuler.scale
     rowsRuler.lengthStitches = rowsRuler.lengthCm * rowsRuler.gauge
     rowsRuler.pixelsPerStitch = pixelsPerCm / rowsRuler.gauge
+
+    document.getElementById("filename").value = "ruler_"
+        + stsRuler.sts.toString().replace(/\./g, "_")
+        + "_sts_"
+        + rowsRuler.sts.toString().replace(/\./g, "_")
+        + "_rows"
+        + "_per_10_cm"
+        + ".pdf"
 }
 
 const resizeCanvas = function () {
@@ -219,7 +225,8 @@ const addRulerInfo = function (ruler) {
     text.justification = "right"
 
     text.fillColor = "black"
-    text.content = "Scale 1/" + ruler.scale + ", gauge " + ruler.sts + " " + ruler.unit + " per " + ruler.stsCm + " cm"
+    text.content = "Scale 1/" + ruler.scale + ", " +
+        "gauge " + ruler.sts + " " + ruler.unit + " per 10 cm"
 
     text.style = {
         fontFamily: "monospace",
@@ -233,7 +240,7 @@ const addRulerInfo = function (ruler) {
     }
 }
 
-const constructRuler = function (ruler) {
+const getMarkings = function (ruler) {
     let distance = 2
     let markings = []
     for (let i = 0; i <= ruler.lengthStitches; i += distance) {
@@ -292,8 +299,8 @@ const build = function () {
     if (form.reportValidity()) {
         updateVariables()
         resizeCanvas()
-        const stsRulerMarkings = constructRuler(stsRuler)
-        const rowsRulerMarkings = constructRuler(rowsRuler)
+        const stsRulerMarkings = getMarkings(stsRuler)
+        const rowsRulerMarkings = getMarkings(rowsRuler)
         drawMarkings(stsRulerMarkings, rowsRulerMarkings)
         drawBorders()
         addRulerInfo(stsRuler)
@@ -305,7 +312,7 @@ const build = function () {
 
 const exportPdf = function () {
     document.getElementById("exportButton").addEventListener("click", function () {
-        const filename = document.getElementById("filename").value || "ruler.pdf"
+        const filename = document.getElementById("filename").value
 
         const canvas = document.getElementById(canvasElementId)
         const imgData = canvas.toDataURL("image/png")
@@ -323,7 +330,7 @@ const exportPdf = function () {
         const imgHeightPt = canvas.height * ptPerPx
 
         pdf.addImage(imgData, "PNG", 40, 40, imgWidthPt, imgHeightPt)
-        pdf.save(filename.endsWith(".pdf") ? filename : filename + ".pdf")
+        pdf.save(filename)
     })
 }
 
