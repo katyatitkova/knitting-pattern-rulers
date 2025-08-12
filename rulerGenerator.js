@@ -364,12 +364,13 @@ const exportPdf = function () {
     })
 }
 
-$(document).ready(function () {
-    build()
+document.addEventListener("DOMContentLoaded", function () {
+    build();
 
-    $("#rulerParameters").change(function () {
-        build()
-    })
+    document.getElementById("rulerParameters").addEventListener("change", function () {
+        build();
+    });
 
-    exportPdf()
-})
+    exportPdf();
+});
+
