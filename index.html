@@ -53,12 +53,18 @@
                     <option value="2">1/2</option>
                     <option value="4" selected>1/4</option>
                 </select>
+                <label for="paperSize">Paper:</label>
+                <select id="paperSize">
+                    <option value="A5">A5</option>
+                    <option value="A4" selected>A4</option>
+                    <option value="A3">A3</option>
+                </select>
                 <input type="checkbox" id="square" checked>
-                <label for="square">Generate a steel square ruler</label>
+                <label for="square">Steel square</label>
             </div>
             <div class="form-row">
                 <label for="filename">Filename:</label>
-                <input type="text" id="filename" style="width:310px" value="ruler.pdf">
+                <input type="text" id="filename" style="width:340px" value="ruler.pdf">
                 <button type="button" id="exportButton">Download ruler as .pdf</button>
             </div>
         </form>

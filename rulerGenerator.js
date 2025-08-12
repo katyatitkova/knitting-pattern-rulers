@@ -13,18 +13,36 @@ const drawDpi = 300
 const pdfDpi = 72
 const cmPerInch = 2.54
 const pxPerCm = drawDpi / cmPerInch
-const marking10LengthCm = 0.8
-const marking10LengthPx = marking10LengthCm * pxPerCm
-const marking5LengthPx = marking10LengthPx / 2
-const marking1LengthPx = marking5LengthPx / 2
-const markingMicroLengthPx = marking1LengthPx / 3
-const fontSize = 26
-const rulerShortCm = 17
-const rulerLongCm = 26
+
+const marking = {
+    long: 0.8 * pxPerCm,
+    medium: 0.4 * pxPerCm,
+    short: 0.2 * pxPerCm,
+    micro: 0.075 * pxPerCm,
+}
+
 const rulerWidthPx = 3 * pxPerCm
 const gaugeCm = 10
+const fontSize = 26
+
+const paperSizes = {
+    "A5": {
+        short: 11.5,
+        long: 17
+    },
+    "A4": {
+        short: 17,
+        long: 26
+    },
+    "A3": {
+        short: 26,
+        long: 38
+    }
+}
 
 const canvasElementId = "rulerCanvas"
+const paperSizeElementId = "paperSize"
+const filenameElementId = "filename"
 
 const stsRuler = {
     unit: "stitches",
@@ -36,28 +54,30 @@ const stsRuler = {
 
 const rowsRuler = {
     unit: "rows",
-    startX: 0,
-    lengthPx: pxPerCm * rulerLongCm
+    startX: 0
 }
 
 const updateVariables = function () {
+    const paperSize = document.getElementById(paperSizeElementId).value
     const square = document.getElementById("square").checked
 
     if (square) {
         stsRuler.square = true
-        stsRuler.lengthPx = pxPerCm * rulerShortCm
+        stsRuler.lengthPx = pxPerCm * paperSizes[paperSize].short
 
         rowsRuler.square = true
         rowsRuler.isVertical = true
         rowsRuler.verticalMarkings = false
+        rowsRuler.lengthPx = pxPerCm * paperSizes[paperSize].long
         rowsRuler.startY = 0
     } else {
         stsRuler.square = false
-        stsRuler.lengthPx = pxPerCm * rulerLongCm
+        stsRuler.lengthPx = pxPerCm * paperSizes[paperSize].long
 
         rowsRuler.square = false
         rowsRuler.isVertical = false
         rowsRuler.verticalMarkings = true
+        rowsRuler.lengthPx = pxPerCm * paperSizes[paperSize].long
         rowsRuler.startY = rulerWidthPx + betweenRulers
     }
 
@@ -77,12 +97,13 @@ const updateVariables = function () {
     rowsRuler.lengthSts = rowsRuler.lengthCm * rowsRuler.gauge
     rowsRuler.pxPerSt = pxPerCm / rowsRuler.gauge
 
-    document.getElementById("filename").value = "ruler_"
+    document.getElementById(filenameElementId).value = "ruler_"
         + stsRuler.sts.toString().replace(/\./g, "_")
         + "_sts_"
         + rowsRuler.sts.toString().replace(/\./g, "_")
         + "_rows"
         + "_per_10_cm"
+        + "_" + paperSize
         + ".pdf"
 }
 
@@ -102,7 +123,7 @@ const calculateMarking = function (ruler, index, markingLength, spacing) {
         return null
     }
 
-    let x1 = ruler.startX + (spacing * index) + (ruler.square? 0 : leftMargin)
+    let x1 = ruler.startX + (spacing * index) + (ruler.square ? 0 : leftMargin)
     let x2 = x1
     let y1 = ruler.startY
     let y2 = ruler.startY + markingLength
@@ -130,6 +151,7 @@ const drawMarking = function (ruler, point1, point2, index, assignNumber) {
     if ((point1 === null) || (point2 === null)) {
         return
     }
+
     let line = new paper.Path.Line([point1.x, point1.y], [point2.x, point2.y])
     line.name = ruler.unit + " marking no. " + index
     line.strokeColor = "black"
@@ -210,10 +232,7 @@ const drawBorders = function () {
 const addRulerInfo = function (ruler) {
     let x = ruler.lengthPx - 50
     let y = ruler.startY + rulerWidthPx - 100
-    let startingPoint = new paper.Point(x, y)
-    if (ruler.isVertical) {
-        startingPoint = new paper.Point(y, x)
-    }
+    let startingPoint = ruler.isVertical ? new paper.Point(y, x) : new paper.Point(x, y)
 
     let text = new paper.PointText(startingPoint)
     text.justification = "right"
@@ -249,10 +268,10 @@ const getMarkings = function (ruler) {
             })
             continue
         }
-        let markingLength = marking10LengthPx
+        let markingLength = marking.long
         let assignNumber = (i % 10 === 0)
         if (!assignNumber) {
-            markingLength = (i % 5 === 0) ? marking5LengthPx : marking1LengthPx
+            markingLength = (i % 5 === 0) ? marking.medium : marking.short
         }
         let points = calculateMarking(ruler, i, markingLength, spacing)
         if (points != null) {
@@ -277,10 +296,10 @@ const drawMarkings = function(stsRulerMarkings, rowsRulerMarkings) {
                 stsRulerMarkings[i].assignNumber = false
                 rowsRulerMarkings[i].assignNumber = false
                 if ((i > 0) && (pointsNearby(stsRulerMarkings[i - 1].point2, rowsRulerMarkings[i].point2))) {
-                    stsRulerMarkings[i - 1].point2.y = stsRulerMarkings[i - 1].point1.y + markingMicroLengthPx
+                    stsRulerMarkings[i - 1].point2.y = stsRulerMarkings[i - 1].point1.y + marking.micro
                 }
                 if ((i > 0) && (pointsNearby(rowsRulerMarkings[i - 1].point2, stsRulerMarkings[i].point2))) {
-                    rowsRulerMarkings[i - 1].point2.x = rowsRulerMarkings[i - 1].point1.x + markingMicroLengthPx
+                    rowsRulerMarkings[i - 1].point2.x = rowsRulerMarkings[i - 1].point1.x + marking.micro
                 }
             }
         }
@@ -312,9 +331,7 @@ const build = function () {
     if (form.reportValidity()) {
         updateVariables()
         resizeCanvas()
-        const stsRulerMarkings = getMarkings(stsRuler)
-        const rowsRulerMarkings = getMarkings(rowsRuler)
-        drawMarkings(stsRulerMarkings, rowsRulerMarkings)
+        drawMarkings(getMarkings(stsRuler), getMarkings(rowsRuler))
         drawBorders()
         addRulerInfo(stsRuler)
         addRulerInfo(rowsRuler)
@@ -325,7 +342,7 @@ const build = function () {
 
 const exportPdf = function () {
     document.getElementById("exportButton").addEventListener("click", function () {
-        const filename = document.getElementById("filename").value
+        const filename = document.getElementById(filenameElementId).value
 
         const canvas = document.getElementById(canvasElementId)
         const imgData = canvas.toDataURL("image/png")
@@ -335,7 +352,7 @@ const exportPdf = function () {
         const pdf = new jsPDF({
             orientation: canvas.width > canvas.height ? "landscape" : "portrait",
             unit: "pt",
-            format: "a4"
+            format: document.getElementById(paperSizeElementId).value
         })
 
         const ptPerPx = pdfDpi / drawDpi
