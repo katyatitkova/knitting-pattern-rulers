@@ -5,14 +5,18 @@
 //TODO make a screenshot
 //TODO add favicon
 
-const leftMargin = 30
-const rightMargin = 60
-const betweenRulers = 100
-
 const drawDpi = 300
 const pdfDpi = 72
 const cmPerInch = 2.54
 const pxPerCm = drawDpi / cmPerInch
+
+const rulerWidthPx = 3 * pxPerCm
+const fontSize = 26
+const leftMargin = 30
+const rightMargin = 60
+const betweenRulers = 100
+
+const gaugeCm = 10
 
 const marking = {
     long: 0.8 * pxPerCm,
@@ -20,10 +24,6 @@ const marking = {
     short: 0.2 * pxPerCm,
     micro: 0.075 * pxPerCm,
 }
-
-const rulerWidthPx = 3 * pxPerCm
-const gaugeCm = 10
-const fontSize = 26
 
 const paperSizes = {
     "A5": {
@@ -118,7 +118,7 @@ const resizeCanvas = function () {
     document.getElementById(canvasElementId).style.height = (height / 3) + 'px'
 }
 
-const calculateMarking = function (ruler, index, markingLength, spacing) {
+const getMarkingPoints = function (ruler, index, markingLength, spacing) {
     if (ruler.square && (index === 0)) {
         return null
     }
@@ -136,11 +136,11 @@ const calculateMarking = function (ruler, index, markingLength, spacing) {
     }
 
     return {
-        point1: {
+        start: {
             x: x1,
             y: y1
         },
-        point2: {
+        finish: {
             x: x2,
             y: y2
         }
@@ -162,6 +162,18 @@ const drawMarking = function (ruler, point1, point2, index, assignNumber) {
     }
 }
 
+const setTextParams = function (text, justification, content, name) {
+    text.fillColor = "black"
+    text.justification = justification
+    text.content = content
+    text.name = name
+    text.style = {
+        fontFamily: "monospace",
+        fontWeight: "bold",
+        fontSize: fontSize
+    }
+}
+
 const addMarkingLabel = function (ruler, point, label) {
     let xLabelOffset = -15
     let yLabelOffset = 30
@@ -176,22 +188,12 @@ const addMarkingLabel = function (ruler, point, label) {
         yLabelOffset = 10
     }
 
-    let startingPoint = new paper.Point(point.x + xLabelOffset, point.y + yLabelOffset)
-    let text = new paper.PointText(startingPoint)
-    text.justification = "left"
-
-    text.fillColor = "black"
-    text.content = label
-
-    text.style = {
-        fontFamily: "monospace",
-        fontWeight: "bold",
-        fontSize: fontSize
-    }
-    text.name = ruler.unit + " label no. " + label
+    let textPoint = new paper.Point(point.x + xLabelOffset, point.y + yLabelOffset)
+    let text = new paper.PointText(textPoint)
+    setTextParams(text, "left", label, ruler.unit + " label no. " + label)
 
     if (ruler.verticalMarkings) {
-        text.rotate(90, startingPoint)
+        text.rotate(90, textPoint)
     }
 }
 
@@ -232,24 +234,16 @@ const drawBorders = function () {
 const addRulerInfo = function (ruler) {
     let x = ruler.lengthPx - 50
     let y = ruler.startY + rulerWidthPx - 100
-    let startingPoint = ruler.isVertical ? new paper.Point(y, x) : new paper.Point(x, y)
+    let textPoint = ruler.isVertical ? new paper.Point(y, x) : new paper.Point(x, y)
 
-    let text = new paper.PointText(startingPoint)
-    text.justification = "right"
-
-    text.fillColor = "black"
-    text.content = "Scale 1/" + ruler.scale + ", " +
-        "gauge " + ruler.sts + " " + ruler.unit + " per " + gaugeCm + " cm"
-
-    text.style = {
-        fontFamily: "monospace",
-        fontWeight: "bold",
-        fontSize: fontSize
-    }
-    text.name = ruler.unit + " ruler info "
+    let text = new paper.PointText(textPoint)
+    setTextParams(text, "right",
+        "Scale 1/" + ruler.scale + ", " +
+            "gauge " + ruler.sts + " " + ruler.unit + " per " + gaugeCm + " cm",
+        ruler.unit + " ruler info ")
 
     if (ruler.isVertical) {
-        text.rotate(90, startingPoint)
+        text.rotate(90, textPoint)
     }
 }
 
@@ -261,8 +255,8 @@ const getMarkings = function (ruler) {
     for (let i = 0; i <= ruler.lengthSts; i++) {
         if (i % distance !== 0) {
             markings.push({
-                point1: null,
-                point2: null,
+                start: null,
+                finish: null,
                 index: i,
                 assignNumber: false
             })
@@ -273,11 +267,11 @@ const getMarkings = function (ruler) {
         if (!assignNumber) {
             markingLength = (i % 5 === 0) ? marking.medium : marking.short
         }
-        let points = calculateMarking(ruler, i, markingLength, spacing)
+        let points = getMarkingPoints(ruler, i, markingLength, spacing)
         if (points != null) {
             markings.push({
-                point1: points.point1,
-                point2: points.point2,
+                start: points.start,
+                finish: points.finish,
                 index: i,
                 assignNumber: assignNumber
             })
@@ -290,16 +284,16 @@ const getMarkings = function (ruler) {
 const drawMarkings = function(stsRulerMarkings, rowsRulerMarkings) {
     if (stsRuler.square) {
         for (let i = 0; i <= 20; i++) {
-            if (pointsNearby(stsRulerMarkings[i].point2, rowsRulerMarkings[i].point2)) {
-                stsRulerMarkings[i].point2.y = rowsRulerMarkings[i].point2.y
-                rowsRulerMarkings[i].point2.x = stsRulerMarkings[i].point2.x
+            if (arePointsNearby(stsRulerMarkings[i].finish, rowsRulerMarkings[i].finish)) {
+                stsRulerMarkings[i].finish.y = rowsRulerMarkings[i].finish.y
+                rowsRulerMarkings[i].finish.x = stsRulerMarkings[i].finish.x
                 stsRulerMarkings[i].assignNumber = false
                 rowsRulerMarkings[i].assignNumber = false
-                if ((i > 0) && (pointsNearby(stsRulerMarkings[i - 1].point2, rowsRulerMarkings[i].point2))) {
-                    stsRulerMarkings[i - 1].point2.y = stsRulerMarkings[i - 1].point1.y + marking.micro
+                if ((i > 0) && (arePointsNearby(stsRulerMarkings[i - 1].finish, rowsRulerMarkings[i].finish))) {
+                    stsRulerMarkings[i - 1].finish.y = stsRulerMarkings[i - 1].start.y + marking.micro
                 }
-                if ((i > 0) && (pointsNearby(rowsRulerMarkings[i - 1].point2, stsRulerMarkings[i].point2))) {
-                    rowsRulerMarkings[i - 1].point2.x = rowsRulerMarkings[i - 1].point1.x + marking.micro
+                if ((i > 0) && (arePointsNearby(rowsRulerMarkings[i - 1].finish, stsRulerMarkings[i].finish))) {
+                    rowsRulerMarkings[i - 1].finish.x = rowsRulerMarkings[i - 1].start.x + marking.micro
                 }
             }
         }
@@ -308,7 +302,7 @@ const drawMarkings = function(stsRulerMarkings, rowsRulerMarkings) {
     drawRulerMarkings(rowsRuler, rowsRulerMarkings)
 }
 
-const pointsNearby = function(point1, point2) {
+const arePointsNearby = function(point1, point2) {
     if ((point1 === null) || (point2 === null)) {
         return false
     }
@@ -318,7 +312,7 @@ const pointsNearby = function(point1, point2) {
 
 const drawRulerMarkings = function(ruler, rulerMarkings) {
     for (let m of rulerMarkings) {
-        drawMarking(ruler, m.point1, m.point2, m.index, m.assignNumber)
+        drawMarking(ruler, m.start, m.finish, m.index, m.assignNumber)
     }
 }
 
